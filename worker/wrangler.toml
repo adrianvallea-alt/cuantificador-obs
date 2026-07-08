@@ -1,0 +1,12 @@
+name = "drywall-api"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "drywall-calc-db"
+database_id = "651274a1-2280-40b8-9c06-b43578489f14"
+
+[[r2_buckets]]
+binding = "IMAGENES"
+bucket_name = "imagenes-productos"

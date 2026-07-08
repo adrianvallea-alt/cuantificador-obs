@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0092ff;
+  --color-secondary: #031d56;
+  --font-sans: 'Montserrat', sans-serif;
+  --radius-2xl: 1rem;
+
+  /* 🚀 EFECTO PREMIUM: Agregamos la animación al motor de Tailwind v4 */
+  --animate-pageTransition: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes slideUpFade {
+    from { 
+      opacity: 0; 
+      transform: translateY(16px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+}
+
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out both;
+}

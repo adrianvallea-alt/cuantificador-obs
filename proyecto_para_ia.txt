@@ -1,0 +1,2893 @@
+=======================================================================
+CONTEXTO DEL PROYECTO (GENERADO AUTOMÁTICAMENTE)
+Este archivo contiene el código fuente estructurado para análisis de IA.
+=======================================================================
+
+=======================================================================
+ESTRUCTURA DE ARCHIVOS INCLUIDOS:
+=======================================================================
+  - .oxlintrc.json
+  - index.html
+  - package.json
+  - README.md
+  - src\api.js
+  - src\App.css
+  - src\App.jsx
+  - src\components\AdminCatalog.jsx
+  - src\components\AdminConfig.jsx
+  - src\components\AdminPanel.jsx
+  - src\components\AdminProjects.jsx
+  - src\components\AdminRecipes.jsx
+  - src\components\Calculator.jsx
+  - src\components\CalculatorSimple.jsx
+  - src\components\Layout.jsx
+  - src\components\LoginModal.jsx
+  - src\components\ResultCard.jsx
+  - src\components\ResultsAdvanced.jsx
+  - src\components\ResultsSimple.jsx
+  - src\components\SettingsIcon.jsx
+  - src\index.css
+  - src\main.jsx
+  - src\utils\calculations.js
+  - src\utils\calculationsAdvanced.js
+  - vite.config.js
+  - worker\src\index.js
+
+=======================================================================
+ARCHIVO: .oxlintrc.json
+=======================================================================
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "oxc"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}
+
+
+=======================================================================
+ARCHIVO: index.html
+=======================================================================
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculadora OBS</title>
+    <!-- Fuente Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+=======================================================================
+ARCHIVO: package.json
+=======================================================================
+{
+  "name": "drywall-calc",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide-react": "^1.21.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "oxlint": "^1.69.0",
+    "tailwindcss": "^4.3.1",
+    "vite": "^8.1.0"
+  }
+}
+
+
+=======================================================================
+ARCHIVO: README.md
+=======================================================================
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the Oxlint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+
+
+=======================================================================
+ARCHIVO: src\api.js
+=======================================================================
+const API_URL = 'https://drywall-api.adrian-valle-a.workers.dev';
+
+export async function fetchCatalog() {
+  const res = await fetch(`${API_URL}/api/catalog`);
+  if (!res.ok) throw new Error('Error al cargar catálogo');
+  return res.json();
+}
+
+export async function saveCatalogProduct(product) {
+  const res = await fetch(`${API_URL}/api/catalog`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(product),
+  });
+  if (!res.ok) throw new Error('Error al guardar producto');
+  return res.json();
+}
+
+export async function updateCatalogProduct(clave, product) {
+  const res = await fetch(`${API_URL}/api/catalog/${clave}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(product),
+  });
+  if (!res.ok) throw new Error('Error al actualizar producto');
+  return res.json();
+}
+
+export async function deleteCatalogProduct(clave) {
+  const res = await fetch(`${API_URL}/api/catalog/${clave}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Error al eliminar producto');
+  return res.json();
+}
+
+export async function fetchRecipes() {
+  const res = await fetch(`${API_URL}/api/recipes`);
+  if (!res.ok) throw new Error('Error al cargar recetas');
+  return res.json();
+}
+
+export async function saveRecipe(recipe) {
+  const res = await fetch(`${API_URL}/api/recipes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(recipe),
+  });
+  if (!res.ok) throw new Error('Error al guardar receta');
+  return res.json();
+}
+
+export async function updateRecipe(id, recipe) {
+  const res = await fetch(`${API_URL}/api/recipes/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(recipe),
+  });
+  if (!res.ok) throw new Error('Error al actualizar receta');
+  return res.json();
+}
+
+export async function deleteRecipe(id) {
+  const res = await fetch(`${API_URL}/api/recipes/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Error al eliminar receta');
+  return res.json();
+}
+
+export async function fetchProjects() {
+  const res = await fetch(`${API_URL}/api/projects`);
+  if (!res.ok) throw new Error('Error al cargar proyectos');
+  return res.json();
+}
+
+export async function saveProject(project) {
+  const res = await fetch(`${API_URL}/api/projects`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(project),
+  });
+  if (!res.ok) throw new Error('Error al guardar proyecto');
+  return res.json();
+}
+
+export async function deleteProject(id) {
+  const res = await fetch(`${API_URL}/api/projects/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Error al eliminar proyecto');
+  return res.json();
+}
+
+export async function login(user, pass) {
+  const res = await fetch(`${API_URL}/api/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user, pass }),
+  });
+  if (!res.ok) return { success: false };
+  return res.json();
+}
+
+=======================================================================
+ARCHIVO: src\App.css
+=======================================================================
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+
+=======================================================================
+ARCHIVO: src\App.jsx
+=======================================================================
+import { useState } from 'react';
+import Layout from './components/Layout';
+import LoginModal from './components/LoginModal';
+import AdminPanel from './components/AdminPanel';
+import CalculatorSimple from './components/CalculatorSimple';
+
+function App() {
+  const [showLogin, setShowLogin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const handleLogin = () => {
+    setIsAdmin(true);
+    setShowLogin(false);
+  };
+
+  const handleLogout = () => setIsAdmin(false);
+
+  return (
+    <Layout onSettingsClick={() => setShowLogin(true)}>
+      {isAdmin ? (
+        <AdminPanel onLogout={handleLogout} />
+      ) : (
+        <CalculatorSimple />
+      )}
+      {showLogin && !isAdmin && (
+        <LoginModal onLogin={handleLogin} onClose={() => setShowLogin(false)} />
+      )}
+    </Layout>
+  );
+}
+
+export default App;
+
+=======================================================================
+ARCHIVO: src\components\AdminCatalog.jsx
+=======================================================================
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Trash2, Edit3, Upload, Search, X } from 'lucide-react';
+import { fetchCatalog, saveCatalogProduct, updateCatalogProduct, deleteCatalogProduct } from '../api';
+
+export default function AdminCatalog() {
+  const [catalog, setCatalog] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingClave, setEditingClave] = useState(null);
+  const [form, setForm] = useState({
+    clave: '',
+    descripcion: '',
+    tipo: '',
+    unidad: 'pieza',
+    marca: '',
+    formula: '',
+    imagen: '',
+  });
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState('');
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    fetchCatalog()
+      .then(data => { setCatalog(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const filteredCatalog = catalog.filter(p =>
+    (p.descripcion || '').toLowerCase().includes(search.toLowerCase()) ||
+    p.clave.toLowerCase().includes(search.toLowerCase()) ||
+    (p.marca && p.marca.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const openNewModal = () => {
+    setForm({ clave: '', descripcion: '', tipo: '', unidad: 'pieza', marca: '', formula: '', imagen: '' });
+    setEditingClave(null);
+    setPreview('');
+    setModalOpen(true);
+  };
+
+  const openEditModal = (p) => {
+    setForm({
+      clave: p.clave || '',
+      descripcion: p.descripcion || p.desc || '',
+      tipo: p.tipo || '',
+      unidad: p.unidad || 'pieza',
+      marca: p.marca || '',
+      formula: p.formula || '',
+      imagen: p.imagen || '',
+    });
+    setEditingClave(p.clave);
+    setPreview(p.imagen || '');
+    setModalOpen(true);
+  };
+
+  const closeModal = () => setModalOpen(false);
+
+  // Subida de imagen a R2
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('https://drywall-api.adrian-valle-a.workers.dev/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setForm({ ...form, imagen: data.url });
+        setPreview(data.url);
+      } else {
+        alert('Error al subir la imagen: ' + (data.error || ''));
+      }
+    } catch (err) {
+      alert('Error al conectar con el servidor.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const saveProduct = async () => {
+    const clave = form.clave?.trim() || '';
+    const descripcion = form.descripcion?.trim() || '';
+    if (!clave || !descripcion) {
+      alert('La clave y la descripción son obligatorias.');
+      return;
+    }
+
+    const productToSave = {
+      clave,
+      descripcion,
+      tipo: form.tipo?.trim() || '',
+      unidad: form.unidad?.trim() || 'pieza',
+      marca: form.marca?.trim() || '',
+      formula: form.formula?.trim() || '',
+      imagen: form.imagen?.trim() || '',
+    };
+
+    try {
+      if (editingClave) {
+        await updateCatalogProduct(editingClave, productToSave);
+      } else {
+        await saveCatalogProduct(productToSave);
+      }
+      const data = await fetchCatalog();
+      setCatalog(data);
+      closeModal();
+    } catch (err) {
+      alert('Error al guardar el producto.');
+    }
+  };
+
+  const deleteProduct = async (clave) => {
+    try {
+      await deleteCatalogProduct(clave);
+      setCatalog(prev => prev.filter(p => p.clave !== clave));
+    } catch (err) {
+      alert('Error al eliminar el producto.');
+    }
+  };
+
+  const handleFileImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const content = event.target.result;
+      let imported = [];
+      try {
+        imported = JSON.parse(content);
+      } catch {
+        const lines = content.split('\n').filter(l => l.trim());
+        if (lines.length < 2) return;
+        const delimiter = lines[0].includes('\t') ? '\t' : ',';
+        const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase());
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(delimiter).map(c => c.trim());
+          if (cols.length < 2) continue;
+          const item = {};
+          headers.forEach((h, idx) => { if (cols[idx]) item[h] = cols[idx]; });
+          imported.push(item);
+        }
+      }
+      for (const item of imported) {
+        await saveCatalogProduct(item);
+      }
+      const data = await fetchCatalog();
+      setCatalog(data);
+      alert(`${imported.length} productos importados.`);
+    };
+    reader.readAsText(file);
+  };
+
+  if (loading) return <p className="text-secondary/50">Cargando catálogo...</p>;
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-secondary">Catálogo de productos</h3>
+        <div className="flex gap-2">
+          <button onClick={() => fileInputRef.current.click()} className="flex items-center gap-2 text-primary text-sm"><Upload size={16} /> Importar</button>
+          <input ref={fileInputRef} type="file" accept=".csv,.json,.txt" onChange={handleFileImport} className="hidden" />
+          <button onClick={openNewModal} className="flex items-center gap-2 text-primary text-sm"><Plus size={16} /> Nuevo</button>
+        </div>
+      </div>
+      <div className="relative mb-4">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary/40" />
+        <input type="text" placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-xl border border-secondary/20 text-sm" />
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead><tr className="text-secondary/70 border-b"><th className="text-left py-2">Clave</th><th className="text-left py-2">Descripción</th><th className="text-left py-2">Tipo</th><th className="text-left py-2">Unidad</th><th></th></tr></thead>
+          <tbody>
+            {filteredCatalog.map(p => (
+              <tr key={p.clave} className="border-b border-secondary/10">
+                <td className="py-2 font-mono">{p.clave}</td>
+                <td className="py-2">{p.desc || p.descripcion || '-'}</td>
+                <td className="py-2">{p.tipo}</td>
+                <td className="py-2">{p.unidad}</td>
+                <td className="py-2 flex gap-2">
+                  <button onClick={() => openEditModal(p)} className="text-primary"><Edit3 size={14} /></button>
+                  <button onClick={() => deleteProduct(p.clave)} className="text-red-500"><Trash2 size={14} /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg mx-4">
+            <div className="flex justify-between items-center mb-4"><h4 className="font-medium">{editingClave ? 'Editar' : 'Nuevo'}</h4><button onClick={closeModal}><X size={20} /></button></div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <input placeholder="Clave" value={form.clave || ''} onChange={e => setForm({...form, clave: e.target.value})} className="rounded-xl border px-3 py-1" />
+                <input placeholder="Descripción" value={form.descripcion || ''} onChange={e => setForm({...form, descripcion: e.target.value})} className="rounded-xl border px-3 py-1" />
+                <input placeholder="Tipo" value={form.tipo || ''} onChange={e => setForm({...form, tipo: e.target.value})} className="rounded-xl border px-3 py-1" />
+                <input placeholder="Unidad" value={form.unidad || ''} onChange={e => setForm({...form, unidad: e.target.value})} className="rounded-xl border px-3 py-1" />
+              </div>
+              {/* Campo de imagen con vista previa */}
+              <div>
+                <label className="text-sm text-secondary/70">Imagen</label>
+                <div className="flex items-center gap-3 mt-1">
+                  {preview && <img src={preview} alt="Vista previa" className="w-16 h-16 rounded-lg object-cover border" />}
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={handleFileUpload}
+                    className="text-sm"
+                    disabled={uploading}
+                  />
+                  {uploading && <span className="text-xs text-secondary/50">Subiendo...</span>}
+                </div>
+                <p className="text-xs text-secondary/50 mt-1">O pega la URL directamente si ya está alojada.</p>
+              </div>
+              <div>
+                <label className="text-sm text-secondary/70">Fórmula</label>
+                <textarea value={form.formula || ''} onChange={e => setForm({...form, formula: e.target.value})} className="w-full rounded-xl border px-3 py-2 text-sm" rows={2} />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button onClick={closeModal} className="px-4 py-2 border rounded-xl">Cancelar</button>
+                <button onClick={saveProduct} className="px-4 py-2 bg-primary text-white rounded-xl">Guardar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\AdminConfig.jsx
+=======================================================================
+import { useState } from 'react';
+
+export default function AdminConfig() {
+  const [newPass, setNewPass] = useState('');
+  const [message, setMessage] = useState('');
+
+  const changePassword = () => {
+    if (!newPass.trim()) return;
+    setMessage('Contraseña actualizada (local).');
+    setNewPass('');
+  };
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold text-secondary mb-4">Configuración general</h3>
+      <div className="max-w-sm space-y-4">
+        <div>
+          <label className="block text-sm text-secondary/70 mb-1">Nueva contraseña</label>
+          <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)} className="w-full rounded-xl border-secondary/20 px-4 py-2 text-secondary" />
+        </div>
+        <button onClick={changePassword} className="px-4 py-2 bg-primary text-white rounded-xl font-semibold">Guardar</button>
+        {message && <p className="text-green-600 text-sm mt-2">{message}</p>}
+      </div>
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\AdminPanel.jsx
+=======================================================================
+import { useState } from 'react';
+import AdminProjects from './AdminProjects';
+import AdminRecipes from './AdminRecipes';
+import AdminCatalog from './AdminCatalog';
+import AdminConfig from './AdminConfig';
+import { LogOut } from 'lucide-react';
+
+const tabs = ['Proyectos', 'Recetas', 'Catálogo', 'Configuración'];
+
+export default function AdminPanel({ onLogout }) {
+  const [active, setActive] = useState(0);
+
+  return (
+    <div className="w-full max-w-6xl mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-secondary">Panel de administración</h1>
+        <button onClick={onLogout} className="flex items-center gap-2 text-secondary/70 hover:text-secondary">
+          <LogOut size={18} /> Salir
+        </button>
+      </div>
+      <div className="flex gap-2 mb-6 border-b border-secondary/10 pb-2">
+        {tabs.map((tab, i) => (
+          <button
+            key={i}
+            onClick={() => setActive(i)}
+            className={`px-4 py-2 rounded-t-lg font-medium text-sm ${active === i ? 'bg-primary text-white' : 'text-secondary/70 hover:bg-secondary/5'}`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        {active === 0 && <AdminProjects />}
+        {active === 1 && <AdminRecipes />}
+        {active === 2 && <AdminCatalog />}
+        {active === 3 && <AdminConfig />}
+      </div>
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\AdminProjects.jsx
+=======================================================================
+import { useState, useEffect } from 'react';
+import { Trash2 } from 'lucide-react';
+import { fetchProjects, deleteProject } from '../api';
+
+export default function AdminProjects() {
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    fetchProjects().then(setProjects);
+  }, []);
+
+  const handleDelete = async (id) => {
+    await deleteProject(id);
+    setProjects(prev => prev.filter(p => p.id !== id));
+  };
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold text-secondary mb-4">Proyectos guardados</h3>
+      {projects.length === 0 && <p className="text-secondary/50">No hay proyectos.</p>}
+      <ul className="space-y-2">
+        {projects.map(p => (
+          <li key={p.id} className="flex justify-between items-center border-b py-2">
+            <div><span className="font-medium">{p.name}</span><span className="text-xs ml-4">{p.fecha}</span></div>
+            <button onClick={() => handleDelete(p.id)} className="text-red-500"><Trash2 size={16} /></button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\AdminRecipes.jsx
+=======================================================================
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Trash2, X, Save } from 'lucide-react';
+import { fetchRecipes, saveRecipe, updateRecipe, deleteRecipe, fetchCatalog } from '../api';
+
+export default function AdminRecipes() {
+  const [catalog, setCatalog] = useState([]);
+  const [recipes, setRecipes] = useState([]);
+  const [search, setSearch] = useState('');
+  const [activeRecipe, setActiveRecipe] = useState({
+    id: null,
+    name: '',
+    humedad: false,
+    permitir_secado_rapido: false,
+    permitir_aislamiento: false,
+    permitir_refuerzos: false,
+    permitir_pintura: false,
+    permitir_resistente: false,
+    imagen: '',
+    productos: [],
+  });
+  const [editingId, setEditingId] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState('');
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    fetchCatalog().then(setCatalog);
+    fetchRecipes().then(data => {
+      const parsed = data.map(r => ({
+        ...r,
+        productos: (typeof r.productos === 'string' ? JSON.parse(r.productos) : (r.productos || [])).map(p => ({
+          ...p,
+          factor: p.factor || 1,
+        })),
+      }));
+      setRecipes(parsed);
+    });
+  }, []);
+
+  const filteredCatalog = catalog.filter(cat =>
+    (cat.descripcion || cat.desc || '').toLowerCase().includes(search.toLowerCase()) ||
+    cat.clave.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const addProduct = (clave) => {
+    if (!activeRecipe.productos.find(p => p.clave === clave)) {
+      setActiveRecipe({ ...activeRecipe, productos: [...activeRecipe.productos, { clave, factor: 1 }] });
+    }
+  };
+  const removeProduct = (clave) => setActiveRecipe({ ...activeRecipe, productos: activeRecipe.productos.filter(p => p.clave !== clave) });
+  const updateFactor = (clave, factor) => setActiveRecipe({ ...activeRecipe, productos: activeRecipe.productos.map(p => p.clave === clave ? { ...p, factor: parseFloat(factor) || 1 } : p) });
+
+  // Subida de imagen a R2
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('https://drywall-api.adrian-valle-a.workers.dev/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setActiveRecipe({ ...activeRecipe, imagen: data.url });
+        setPreview(data.url);
+      } else {
+        alert('Error al subir la imagen: ' + (data.error || ''));
+      }
+    } catch (err) {
+      alert('Error al conectar con el servidor.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!activeRecipe.name.trim()) return;
+    if (editingId) {
+      await updateRecipe(editingId, activeRecipe);
+    } else {
+      await saveRecipe(activeRecipe);
+    }
+    const data = await fetchRecipes();
+    const parsed = data.map(r => ({
+      ...r,
+      productos: (typeof r.productos === 'string' ? JSON.parse(r.productos) : (r.productos || [])).map(p => ({
+        ...p,
+        factor: p.factor || 1,
+      })),
+    }));
+    setRecipes(parsed);
+    setActiveRecipe({ id: null, name: '', humedad: false, permitir_secado_rapido: false, permitir_aislamiento: false, permitir_refuerzos: false, permitir_pintura: false, permitir_resistente: false, imagen: '', productos: [] });
+    setEditingId(null);
+    setPreview('');
+  };
+
+  const handleEdit = (r) => {
+    const productos = (Array.isArray(r.productos) ? r.productos : []).map(p => ({ ...p, factor: p.factor || 1 }));
+    setActiveRecipe({ ...r, productos });
+    setEditingId(r.id);
+    setPreview(r.imagen || '');
+  };
+
+  const handleDelete = async (id) => {
+    await deleteRecipe(id);
+    setRecipes(prev => prev.filter(r => r.id !== id));
+    if (editingId === id) {
+      setActiveRecipe({ id: null, name: '', humedad: false, permitir_secado_rapido: false, permitir_aislamiento: false, permitir_refuerzos: false, permitir_pintura: false, permitir_resistente: false, imagen: '', productos: [] });
+      setEditingId(null);
+      setPreview('');
+    }
+  };
+
+  const cancelEdit = () => {
+    setActiveRecipe({ id: null, name: '', humedad: false, permitir_secado_rapido: false, permitir_aislamiento: false, permitir_refuerzos: false, permitir_pintura: false, permitir_resistente: false, imagen: '', productos: [] });
+    setEditingId(null);
+    setSearch('');
+    setPreview('');
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-1">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-secondary">Recetas</h3>
+          <button onClick={() => { setActiveRecipe({ id: null, name: '', humedad: false, permitir_secado_rapido: false, permitir_aislamiento: false, permitir_refuerzos: false, permitir_pintura: false, permitir_resistente: false, imagen: '', productos: [] }); setEditingId(null); setPreview(''); }} className="flex items-center gap-1 text-primary text-sm"><Plus size={16} /> Nueva</button>
+        </div>
+        <ul className="space-y-2">
+          {recipes.length === 0 && <li className="text-secondary/50 text-sm">No hay recetas.</li>}
+          {recipes.map(r => (
+            <li key={r.id} onClick={() => handleEdit(r)} className={`p-2 rounded-lg border cursor-pointer ${editingId === r.id ? 'border-primary bg-primary/5' : 'border-secondary/10'}`}>
+              <div className="flex justify-between"><span className="font-medium text-sm">{r.name}</span><button onClick={(e) => { e.stopPropagation(); handleDelete(r.id); }} className="text-red-500"><Trash2 size={14} /></button></div>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="lg:col-span-2">
+        <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4">
+          <h4 className="font-medium text-secondary">{editingId ? 'Editar receta' : 'Nueva receta'}</h4>
+          <input type="text" placeholder="Nombre de la receta" value={activeRecipe.name} onChange={e => setActiveRecipe({ ...activeRecipe, name: e.target.value })} className="w-full rounded-xl border px-4 py-2" />
+          
+          {/* Campo de imagen con subida */}
+          <div>
+            <label className="text-sm text-secondary/70">Imagen del proyecto</label>
+            <div className="flex items-center gap-3 mt-1">
+              {preview && <img src={preview} alt="Vista previa" className="w-16 h-16 rounded-lg object-cover border" />}
+              <input
+                type="file"
+                accept="image/png, image/jpeg, image/webp"
+                onChange={handleImageUpload}
+                className="text-sm"
+                disabled={uploading}
+              />
+              {uploading && <span className="text-xs text-secondary/50">Subiendo...</span>}
+            </div>
+            <p className="text-xs text-secondary/50 mt-1">También podés pegar la URL directamente.</p>
+            <input
+              type="text"
+              placeholder="O pegá la URL de la imagen"
+              value={activeRecipe.imagen || ''}
+              onChange={e => { setActiveRecipe({ ...activeRecipe, imagen: e.target.value }); setPreview(e.target.value); }}
+              className="w-full rounded-xl border px-4 py-2 text-sm mt-2"
+            />
+          </div>
+
+          <div className="flex items-center gap-2"><input type="checkbox" checked={activeRecipe.humedad || false} onChange={e => setActiveRecipe({ ...activeRecipe, humedad: e.target.checked })} /> Zona húmeda / exterior</div>
+          <div className="flex items-center gap-2"><input type="checkbox" checked={activeRecipe.permitir_secado_rapido || false} onChange={e => setActiveRecipe({ ...activeRecipe, permitir_secado_rapido: e.target.checked })} /> Permitir secado rápido</div>
+          <div className="flex items-center gap-2"><input type="checkbox" checked={activeRecipe.permitir_aislamiento || false} onChange={e => setActiveRecipe({ ...activeRecipe, permitir_aislamiento: e.target.checked })} /> Permitir aislamiento</div>
+          <div className="flex items-center gap-2"><input type="checkbox" checked={activeRecipe.permitir_refuerzos || false} onChange={e => setActiveRecipe({ ...activeRecipe, permitir_refuerzos: e.target.checked })} /> Permitir refuerzos horizontales</div>
+          <div className="flex items-center gap-2"><input type="checkbox" checked={activeRecipe.permitir_pintura || false} onChange={e => setActiveRecipe({ ...activeRecipe, permitir_pintura: e.target.checked })} /> Permitir pintura</div>
+          <div className="flex items-center gap-2"><input type="checkbox" checked={activeRecipe.permitir_resistente || false} onChange={e => setActiveRecipe({ ...activeRecipe, permitir_resistente: e.target.checked })} /> Permitir muro más resistente</div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2">Productos</label>
+            {activeRecipe.productos.map(prod => {
+              const cat = catalog.find(c => c.clave === prod.clave);
+              return (
+                <div key={prod.clave} className="flex items-center gap-2 bg-secondary/5 rounded-lg p-2">
+                  <span className="flex-1 text-sm">{cat ? `${cat.clave} – ${cat.descripcion || cat.desc}` : prod.clave}</span>
+                  <input type="number" value={prod.factor} onChange={e => updateFactor(prod.clave, e.target.value)} className="w-16 text-sm border rounded px-2 py-1" min="0.5" step="0.1" />
+                  <button onClick={() => removeProduct(prod.clave)} className="text-red-500"><X size={14} /></button>
+                </div>
+              );
+            })}
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Agregar producto</label>
+            <input type="text" placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="w-full rounded-xl border px-4 py-2 text-sm mb-2" />
+            <div className="max-h-40 overflow-y-auto border rounded-xl p-2">
+              {filteredCatalog.map(cat => (
+                <button key={cat.clave} onClick={() => addProduct(cat.clave)} className="block w-full text-left px-2 py-1 rounded hover:bg-primary/10 text-sm">{cat.clave} - {cat.descripcion || cat.desc}</button>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button onClick={cancelEdit} className="px-4 py-2 border rounded-xl">Cancelar</button>
+            <button onClick={handleSave} className="px-4 py-2 bg-primary text-white rounded-xl flex items-center gap-2"><Save size={16} /> Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\Calculator.jsx
+=======================================================================
+import { useState } from 'react';
+import { Calculator as CalcIcon } from 'lucide-react';
+import { calculateMaterials, getStoredYields } from '../utils/calculations';
+import ResultCard from './ResultCard';
+
+/**
+ * Sección principal de la calculadora pública.
+ * Contiene el campo de metros cuadrados, el botón de cálculo
+ * y la cuadrícula de resultados.
+ */
+export default function Calculator() {
+  const [area, setArea] = useState('');
+  const [results, setResults] = useState(null);
+  const [error, setError] = useState('');
+
+  const handleCalculate = () => {
+    const m2 = parseFloat(area);
+    if (isNaN(m2) || m2 <= 0) {
+      setError('Ingresa un área válida mayor a 0 m²');
+      setResults(null);
+      return;
+    }
+    setError('');
+
+    // Usamos los rendimientos almacenados (o los por defecto)
+    const yields = getStoredYields();
+    const materials = calculateMaterials(m2, yields);
+    setResults(materials);
+  };
+
+  // Manejar Enter en el input
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleCalculate();
+    }
+  };
+
+  return (
+    <div className="w-full max-w-2xl">
+      {/* Título y descripción */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-secondary mb-2">
+          Calculadora de Drywall
+        </h1>
+        <p className="text-secondary/60 text-sm">
+          Calculá los materiales necesarios para tu proyecto de construcción en seco.
+        </p>
+      </div>
+
+      {/* Entrada de metros cuadrados */}
+      <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8">
+        <label
+          htmlFor="area-input"
+          className="block text-sm font-medium text-secondary mb-2"
+        >
+          Metros cuadrados (m²)
+        </label>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            id="area-input"
+            type="number"
+            min="0"
+            step="0.01"
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ej: 25"
+            className="flex-1 rounded-xl border border-secondary/20 px-4 py-3 text-secondary placeholder:text-secondary/30 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow shadow-sm"
+          />
+          <button
+            onClick={handleCalculate}
+            className="bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-8 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            <CalcIcon className="w-5 h-5" />
+            Calcular materiales
+          </button>
+        </div>
+        {error && (
+          <p className="text-red-500 text-sm mt-2">{error}</p>
+        )}
+      </div>
+
+      {/* Resultados */}
+      {results && (
+        <div className="animate-fadeIn">
+          <h2 className="text-xl font-semibold text-secondary mb-4 text-center">
+            Materiales necesarios
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <ResultCard
+              label="Placas"
+              value={results.placas}
+              unit="unidades"
+              materialKey="placas"
+            />
+            <ResultCard
+              label="Perfiles"
+              value={results.perfiles}
+              unit="unidades"
+              materialKey="perfiles"
+            />
+            <ResultCard
+              label="Tornillos"
+              value={results.tornillos}
+              unit="unidades"
+              materialKey="tornillos"
+            />
+            <ResultCard
+              label="Cinta"
+              value={results.cinta}
+              unit="metros"
+              materialKey="cinta"
+            />
+            <ResultCard
+              label="Masilla"
+              value={results.masilla}
+              unit="kg"
+              materialKey="masilla"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\CalculatorSimple.jsx
+=======================================================================
+import { useState, useEffect, useCallback } from 'react';
+import { calculateFromRecipe } from '../utils/calculationsAdvanced';
+import ResultsSimple from './ResultsSimple';
+import { fetchCatalog, fetchRecipes } from '../api';
+import {
+  Plus, Trash2, X, DoorOpen, AppWindow, CheckCircle,
+  ArrowRight, ArrowLeft, Home, Shield, Sun, AlertCircle,
+  Box, HelpCircle, Ruler, PaintBucket, Sparkles, Loader2,
+  BrickWall, Palette
+} from 'lucide-react';
+
+/* ====================== SUBCOMPONENTES PREMIUM ====================== */
+
+function StepIndicator({ steps, current }) {
+  const icons = [Ruler, BrickWall, Palette];
+  return (
+    <div className="flex items-center justify-between mb-10 px-2">
+      {steps.map((label, idx) => {
+        const Icon = icons[idx];
+        const isCompleted = idx < current;
+        const isActive = idx === current;
+        return (
+          <div key={label} className="flex flex-col items-center gap-1 relative flex-1">
+            <div className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
+              isCompleted ? 'bg-primary text-white' :
+              isActive ? 'bg-primary text-white shadow-xl shadow-primary/30 scale-110' :
+              'bg-secondary/10 text-secondary/40'
+            }`}>
+              <Icon size={22} className={isActive ? 'animate-pulse' : ''} />
+              {isCompleted && <CheckCircle size={14} className="absolute -top-1 -right-1 text-primary bg-white rounded-full" />}
+            </div>
+            <span className={`text-[10px] font-semibold mt-1 text-center ${
+              isActive ? 'text-primary' : 'text-secondary/40'
+            }`}>{label}</span>
+            {idx < steps.length - 1 && (
+              <div className="absolute top-6 left-[calc(50%+1.5rem)] w-[calc(100%-3rem)] h-0.5 -z-10">
+                <div className={`h-full transition-all duration-700 ${isCompleted ? 'bg-primary' : 'bg-secondary/10'}`} />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ProjectCard({ recipe, isSelected, onSelect }) {
+  const icons = { 'MURO INTERIOR': Home, 'MURO EXTERIOR': Shield, 'PLAFÓN': Sun };
+  const Icon = icons[recipe.name?.toUpperCase()] || Box;
+
+  return (
+    <div
+      onClick={() => onSelect(recipe)}
+      className={`group cursor-pointer rounded-3xl p-5 border-2 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 active:scale-[0.98] ${
+        isSelected ? 'border-primary bg-primary/5 shadow-xl shadow-primary/10' : 'border-secondary/10 hover:border-primary/40 bg-white'
+      }`}
+    >
+      <div className="flex items-center gap-4">
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${
+          isSelected ? 'bg-primary text-white shadow-lg' : 'bg-secondary/5 text-secondary/40 group-hover:text-primary group-hover:bg-primary/10'
+        }`}>
+          {recipe.imagen ? (
+            <img src={recipe.imagen} alt={recipe.name} className="w-full h-full rounded-2xl object-cover" onError={(e) => e.target.style.display = 'none'} />
+          ) : (
+            <Icon size={28} />
+          )}
+        </div>
+        <div className="flex-1">
+          <h3 className="font-bold text-secondary text-lg">{recipe.name}</h3>
+          <p className="text-xs text-secondary/50 mt-1 leading-relaxed">
+            {recipe.humedad && '🌧 Húmedo · '}
+            {recipe.permitir_secado_rapido && '⏱ Rápido · '}
+            {recipe.permitir_pintura && '🎨 Pintura · '}
+            {recipe.permitir_resistente && '🛡 Resistente · '}
+            Panel y estructura incluidos
+          </p>
+        </div>
+        <div className="text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <ArrowRight size={20} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AberturaModal({ tipo, onAdd, onClose }) {
+  const [ancho, setAncho] = useState(tipo === 'puerta' ? '0.90' : '1.20');
+  const [alto, setAlto] = useState(tipo === 'puerta' ? '2.10' : '1.00');
+
+  const handleAdd = () => {
+    const w = parseFloat(ancho);
+    const h = parseFloat(alto);
+    if (!w || !h || w <= 0 || h <= 0) return;
+    onAdd({ ancho: w, alto: h });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn p-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm transform transition-all scale-100">
+        <div className="flex justify-between items-center mb-6">
+          <h4 className="text-lg font-bold text-secondary flex items-center gap-2">
+            {tipo === 'puerta' ? '🚪 Nueva puerta' : '🪟 Nueva ventana'}
+          </h4>
+          <button onClick={onClose} className="text-secondary/50 hover:text-secondary transition-colors p-1"><X size={20} /></button>
+        </div>
+        <p className="text-xs text-secondary/50 mb-4 bg-secondary/5 rounded-lg p-2">
+          💡 Medida estándar sugerida. Toca los números para cambiarlos.
+        </p>
+        <div className="space-y-5">
+          <div>
+            <label className="text-sm font-medium text-secondary/70">Ancho (metros)</label>
+            <input type="number" step="0.01" inputMode="decimal" value={ancho} onChange={e => setAncho(e.target.value)} className="w-full mt-1 rounded-xl border-secondary/20 px-4 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base" />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-secondary/70">Alto (metros)</label>
+            <input type="number" step="0.01" inputMode="decimal" value={alto} onChange={e => setAlto(e.target.value)} className="w-full mt-1 rounded-xl border-secondary/20 px-4 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base" />
+          </div>
+          <button onClick={handleAdd} className="w-full bg-primary text-white py-3.5 rounded-xl font-semibold hover:bg-primary/90 active:scale-95 transition-all shadow-lg shadow-primary/20">
+            Agregar {tipo === 'puerta' ? 'puerta' : 'ventana'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ToggleSwitch({ checked, onChange, label, tooltip }) {
+  return (
+    <div className="flex items-center justify-between py-3 px-4 bg-secondary/5 rounded-xl">
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-secondary/80 font-medium">{label}</span>
+        {tooltip && (
+          <span className="relative group cursor-help">
+            <HelpCircle size={14} className="text-secondary/40 hover:text-primary transition-colors" />
+            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-56 bg-secondary text-white text-xs rounded-xl p-3 shadow-lg z-10 leading-relaxed">
+              {tooltip}
+            </span>
+          </span>
+        )}
+      </div>
+      <label className="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" checked={checked} onChange={onChange} className="sr-only peer" />
+        <div className="w-11 h-6 bg-secondary/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+      </label>
+    </div>
+  );
+}
+
+function Skeleton({ className }) {
+  return <div className={`animate-pulse bg-gradient-to-r from-secondary/5 via-secondary/10 to-secondary/5 rounded-xl ${className}`} />;
+}
+
+function NivelTooltip({ nivel }) {
+  const descripciones = {
+    '0.2': 'Nivel 1 – Solo encintado\n• Se aplica cinta en las juntas y una capa delgada de compuesto.\n• Uso: zonas ocultas (áticos, plafones no visibles) o como base para azulejo.',
+    '0.45': 'Nivel 2 – Encintado + 1 capa\n• Cinta más una capa de compuesto sobre juntas y cabezas de tornillos.\n• Uso: garajes, almacenes o donde la apariencia no es crítica.',
+    '0.75': 'Nivel 3 – Dos capas\n• Dos capas de compuesto sobre juntas y una sobre tornillos.\n• Uso: antes de texturizar o en áreas de tránsito limitado.',
+    '1.0': 'Nivel 4 – Acabado estándar (3 capas)\n• Tres capas de compuesto. La superficie queda lisa y uniforme.\n• Uso: pintura mate o semibrillante en interiores residenciales.',
+    '1.4': 'Nivel 5 – Skim coat completo\n• Capa fina de compuesto sobre toda la superficie.\n• Uso: pintura brillante o iluminación rasante que resalta imperfecciones.',
+  };
+  return (
+    <span className="relative group ml-1 cursor-help">
+      <HelpCircle size={14} className="text-secondary/40 hover:text-primary transition-colors" />
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-64 bg-secondary text-white text-xs rounded-xl p-3 shadow-lg z-10 whitespace-pre-line leading-relaxed">
+        {descripciones[nivel] || 'Selecciona un nivel'}
+      </span>
+    </span>
+  );
+}
+
+/* ====================== FUNCIÓN AUXILIAR PARA IMÁGENES ====================== */
+function getProductImage(product) {
+  if (!product) return null;
+  return product.imagen || product.foto || product.url || product.image || null;
+}
+
+/* ====================== COMPONENTE PRINCIPAL ====================== */
+
+export default function CalculatorSimple() {
+  const [recipes, setRecipes] = useState([]);
+  const [catalog, setCatalog] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [step, setStep] = useState(0);
+  const [previousStep, setPreviousStep] = useState(0);
+  const [showToast, setShowToast] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [resistenteMsg, setResistenteMsg] = useState('');
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  const [params, setParams] = useState({
+    largo: '', alto: '', esquinas: '0', puertas: [], ventanas: [],
+    separacionPostes: '0.406', factorCaras: '1', nivelCompuestoKg: '0.75',
+    anchoPerfil: '4.10', calibre: '26',
+    secadoRapido: false, aislamiento: false, refuerzos: false,
+    selectedPanelA: '', selectedPanelB: '',
+    incluirPintura: false, pinturaSeleccionada: '', superficie: 'lisa',
+    selladorSeleccionado: '',
+    incluirResistente: false,
+    adherencia: false,
+  });
+
+  const [results, setResults] = useState(null);
+  const [modalAbertura, setModalAbertura] = useState(null);
+
+  useEffect(() => {
+    Promise.all([fetchRecipes(), fetchCatalog()])
+      .then(([recipesData, catalogData]) => {
+        const parsed = recipesData.map(r => ({
+          ...r,
+          permitir_secado_rapido: !!r.permitir_secado_rapido,
+          permitir_aislamiento: !!r.permitir_aislamiento,
+          permitir_refuerzos: !!r.permitir_refuerzos,
+          permitir_pintura: !!r.permitir_pintura,
+          permitir_resistente: !!r.permitir_resistente,
+          productos: (typeof r.productos === 'string' ? JSON.parse(r.productos) : (r.productos || [])).map(p => ({ ...p, factor: p.factor || 1 })),
+        }));
+        setRecipes(parsed);
+        setCatalog(catalogData);
+      })
+      .catch(() => setErrorMsg('No se pudieron cargar los datos. Intenta de nuevo.'))
+      .finally(() => setLoadingData(false));
+  }, []);
+
+  const availablePanels = useCallback(() => {
+    if (!selectedRecipe) return [];
+    return selectedRecipe.productos
+      .map(item => catalog.find(p => p.clave === item.clave))
+      .filter(p => p && p.tipo === 'panel');
+  }, [selectedRecipe, catalog]);
+
+  const handleRecipeSelect = (recipe) => {
+    setSelectedRecipe(recipe);
+    setStep(0);
+    setErrorMsg('');
+    const panels = recipe.productos
+      .map(item => catalog.find(p => p.clave === item.clave))
+      .filter(p => p && p.tipo === 'panel');
+    if (panels.length > 0) {
+      setParams(prev => ({
+        ...prev,
+        selectedPanelA: panels[0]?.clave || '',
+        selectedPanelB: panels.length > 1 ? panels[1]?.clave : panels[0]?.clave || '',
+      }));
+    }
+  };
+
+  const handleBackToSelection = () => { setSelectedRecipe(null); setResults(null); setStep(0); };
+
+  const getNumericParams = () => ({
+    ...params,
+    largo: parseFloat(params.largo),
+    alto: parseFloat(params.alto),
+    esquinas: parseInt(params.esquinas) || 0,
+    separacionPostes: parseFloat(params.separacionPostes),
+    factorCaras: parseFloat(params.factorCaras),
+    nivelCompuestoKg: parseFloat(params.nivelCompuestoKg),
+    anchoPerfil: parseFloat(params.anchoPerfil),
+    calibre: parseInt(params.calibre),
+  });
+
+  const addAbertura = (tipo, dim) => {
+    if (tipo === 'puerta') setParams(p => ({ ...p, puertas: [...p.puertas, dim] }));
+    else setParams(p => ({ ...p, ventanas: [...p.ventanas, dim] }));
+  };
+  const removeAbertura = (tipo, index) => {
+    if (tipo === 'puerta') setParams(p => ({ ...p, puertas: p.puertas.filter((_, i) => i !== index) }));
+    else setParams(p => ({ ...p, ventanas: p.ventanas.filter((_, i) => i !== index) }));
+  };
+
+  const handleToggleResistente = (checked) => {
+    setParams(prev => {
+      const nuevosParams = { ...prev, incluirResistente: checked };
+      if (checked) {
+        nuevosParams.nivelCompuestoKg = '0.2';
+        setResistenteMsg('✅ Nivel de acabado ajustado a 1 (solo encintado). La estuka SikaWall refuerza y sella.');
+        setTimeout(() => setResistenteMsg(''), 5000);
+      } else {
+        nuevosParams.adherencia = false;
+      }
+      return nuevosParams;
+    });
+  };
+
+  const handleCalculate = () => {
+    const numParams = getNumericParams();
+    if (!numParams.largo || numParams.largo <= 0 || !numParams.alto || numParams.alto <= 0) {
+      setErrorMsg('Por favor ingresa un largo y alto válidos.');
+      return;
+    }
+    setErrorMsg('');
+    setPreviousStep(step);
+    setIsCalculating(true);
+    setTimeout(() => {
+      const materials = calculateFromRecipe(selectedRecipe, {
+        ...numParams,
+        secadoRapido: params.secadoRapido,
+        aislamiento: params.aislamiento,
+        refuerzos: params.refuerzos,
+        incluirPintura: params.incluirPintura,
+        pinturaSeleccionada: params.pinturaSeleccionada,
+        superficie: params.superficie,
+        selladorSeleccionado: params.selladorSeleccionado,
+        incluirResistente: params.incluirResistente,
+        adherencia: params.adherencia,
+        selectedPanelA: params.selectedPanelA,
+        selectedPanelB: params.selectedPanelB,
+      }, catalog);
+      setResults(materials);
+      setIsCalculating(false);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }, 400);
+  };
+
+  const handleBackToForm = () => { setResults(null); setStep(previousStep); };
+
+  const steps = ['Medidas', 'Características', 'Acabado'];
+
+  if (loadingData) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6 p-6">
+        <Skeleton className="h-10 w-3/4" />
+        <Skeleton className="h-32 w-full rounded-3xl" />
+        <Skeleton className="h-48 w-full rounded-3xl" />
+        <Skeleton className="h-24 w-full rounded-3xl" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto px-4 pb-24 pt-2">
+      <div className="text-center my-8">
+        <h1 className="text-4xl font-bold text-secondary tracking-tight">CUANTIFICADOR OBS</h1>
+        <p className="text-secondary/50 mt-2 text-sm">HAZ TU PROYECTO UNA REALIDAD</p>
+      </div>
+
+      {!selectedRecipe && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-secondary mb-2">¿Qué tipo de proyecto vas a hacer?</h2>
+          <p className="text-sm text-secondary/50 mb-6">Cada proyecto ya incluye los materiales básicos. Elige el que más se parezca al tuyo.</p>
+          {recipes.length === 0 && (
+            <div className="text-center py-16 bg-secondary/5 rounded-3xl">
+              <Home size={48} className="mx-auto text-secondary/20 mb-4" />
+              <p className="text-secondary/50">No hay proyectos disponibles.</p>
+              <p className="text-xs text-secondary/30 mt-1">Contacta al administrador para crear uno.</p>
+            </div>
+          )}
+          <div className="space-y-3">
+            {recipes.map(r => (
+              <ProjectCard key={r.id} recipe={r} isSelected={false} onSelect={handleRecipeSelect} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {selectedRecipe && (
+        <>
+          <button onClick={handleBackToSelection} className="mb-6 flex items-center gap-1 text-sm text-secondary/70 hover:text-secondary transition-colors">
+            ← Elegir otro proyecto
+          </button>
+          {!results && (
+            <>
+              <StepIndicator steps={steps} current={step} />
+
+              {/* ===== PASO 0: Medidas + Aberturas ===== */}
+              {step === 0 && (
+                <div className="bg-white rounded-3xl shadow-xl shadow-secondary/5 p-6 animate-fadeIn">
+                  <h3 className="text-lg font-bold text-secondary mb-2">📏 INSERTA LAS MEDIDAS DE TU MURO</h3>
+                  <p className="text-sm text-secondary/50 mb-6">No necesitas ser exacto, con un aproximado basta.</p>
+                  <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div>
+                      <label className="text-sm text-secondary/70 mb-1 block">Largo (metros)</label>
+                      <input type="number" step="0.01" inputMode="decimal" value={params.largo} onChange={e => setParams({...params, largo: e.target.value})} placeholder="Ej. 5.00" className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base" />
+                    </div>
+                    <div>
+                      <label className="text-sm text-secondary/70 mb-1 block">Altura (metros)</label>
+                      <input type="number" step="0.01" inputMode="decimal" value={params.alto} onChange={e => setParams({...params, alto: e.target.value})} placeholder="Ej. 2.44" className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base" />
+                    </div>
+                    <div>
+                      <label className="text-sm text-secondary/70 mb-1 block">Esquinas</label>
+                      <input type="number" inputMode="numeric" value={params.esquinas} onChange={e => setParams({...params, esquinas: e.target.value})} className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base" />
+                    </div>
+                    <div>
+                      <label className="text-sm text-secondary/70 mb-1 block">Separación entre postes</label>
+                      <select value={params.separacionPostes} onChange={e => setParams({...params, separacionPostes: e.target.value})} className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base bg-white">
+                        <option value="0.305">30.5cm 12'</option>
+                        <option value="0.406">40.6cm 16'</option>
+                        <option value="0.61">61cm 24'</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-secondary/10 pt-6 mb-8">
+                    <h4 className="text-sm font-semibold text-secondary/80 mb-4">💪 PERFIL METÁLICO</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs text-secondary/50 mb-1 block">Ancho del perfil</label>
+                        <select value={params.anchoPerfil} onChange={e => setParams({...params, anchoPerfil: e.target.value})} className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base bg-white">
+                          <option value="4.10">4.10cm 1.61"</option>
+                          <option value="6.35">6.35cm 2.5"</option>
+                          <option value="9.20">9.20cm 3.62"</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs text-secondary/50 mb-1 block">Calibre (grosor)</label>
+                        <select value={params.calibre} onChange={e => setParams({...params, calibre: e.target.value})} className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base bg-white">
+                          <option value="26">26 (Estandar)</option>
+                          <option value="20">20 (Estructural)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ===== SWITCHES DE AISLAMIENTO Y REFUERZOS (MOVIDOS AQUÍ) ===== */}
+                  <div className="border-t border-secondary/10 pt-6 mb-6">
+                    <h4 className="text-sm font-semibold text-secondary/80 mb-4">⚙️ OPCIONES ESTRUCTURALES</h4>
+                    <div className="space-y-1">
+                      {selectedRecipe.permitir_aislamiento && <ToggleSwitch checked={params.aislamiento} onChange={e => setParams({...params, aislamiento: e.target.checked})} label="Aislamiento térmico/acústico" tooltip="Reduce el ruido y conserva la temperatura interior. Ideal para dormitorios o salas." />}
+                      {selectedRecipe.permitir_refuerzos && <ToggleSwitch checked={params.refuerzos} onChange={e => setParams({...params, refuerzos: e.target.checked})} label="Refuerzos horizontales" tooltip="Añade canales entre postes para mayor rigidez estructural. Recomendado para muros que requieren cargar mas peso." />}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-secondary/10 pt-6">
+                    <h4 className="text-sm font-semibold text-secondary/80 mb-4">🚪 ¿LLEVA PUERTAS O VENTANAS?</h4>
+                    <div className="flex gap-3 mb-4">
+                      <button onClick={() => setModalAbertura('puerta')} className="flex-1 flex flex-col items-center justify-center gap-1 border-2 border-dashed border-secondary/20 rounded-2xl py-5 hover:border-primary/50 hover:bg-primary/5 transition-all active:scale-95">
+                        <DoorOpen size={24} className="text-primary" />
+                        <span className="text-xs text-secondary/70">Agregar puerta</span>
+                      </button>
+                      <button onClick={() => setModalAbertura('ventana')} className="flex-1 flex flex-col items-center justify-center gap-1 border-2 border-dashed border-secondary/20 rounded-2xl py-5 hover:border-primary/50 hover:bg-primary/5 transition-all active:scale-95">
+                        <AppWindow size={24} className="text-primary" />
+                        <span className="text-xs text-secondary/70">Agregar ventana</span>
+                      </button>
+                    </div>
+                    {params.puertas.length > 0 && (
+                      <div className="mb-3">
+                        <span className="text-xs text-secondary/50 font-medium">Puertas:</span>
+                        {params.puertas.map((p, i) => (
+                          <div key={i} className="flex items-center justify-between bg-primary/5 rounded-lg p-3 mt-1 animate-fadeIn">
+                            <span className="text-sm">{p.ancho}m × {p.alto}m</span>
+                            <button onClick={() => removeAbertura('puerta', i)} className="text-red-500 active:scale-90 transition-transform"><Trash2 size={16} /></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {params.ventanas.length > 0 && (
+                      <div>
+                        <span className="text-xs text-secondary/50 font-medium">Ventanas:</span>
+                        {params.ventanas.map((v, i) => (
+                          <div key={i} className="flex items-center justify-between bg-primary/5 rounded-lg p-3 mt-1 animate-fadeIn">
+                            <span className="text-sm">{v.ancho}m × {v.alto}m</span>
+                            <button onClick={() => removeAbertura('ventana', i)} className="text-red-500 active:scale-90 transition-transform"><Trash2 size={16} /></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end mt-8">
+                    <button onClick={() => setStep(1)} className="flex items-center gap-2 bg-primary text-white px-6 py-3.5 rounded-xl font-semibold hover:bg-primary/90 active:scale-95 transition-all shadow-lg shadow-primary/20">
+                      Siguiente: Características <ArrowRight size={18} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ===== PASO 1: Características (antes Acabado) ===== */}
+              {step === 1 && (
+                <div className="bg-white rounded-3xl shadow-xl shadow-secondary/5 p-6 animate-fadeIn">
+                  <h3 className="text-lg font-bold text-secondary mb-2">🧱 CARACTERISTICAS DEL MURO</h3>
+                  <p className="text-sm text-secondary/50 mb-6">Elige el tipo de panel y nivel de acabado.</p>
+                  <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div>
+                      <label className="text-sm text-secondary/70 mb-1 block">Caras a cubrir</label>
+                      <select value={params.factorCaras} onChange={e => setParams({...params, factorCaras: e.target.value})} className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base bg-white">
+                        <option value="1">Una cara</option>
+                        <option value="2">Dos caras</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm text-secondary/70 mb-1 inline-flex items-center gap-1">
+                        Nivel de acabado <NivelTooltip nivel={params.nivelCompuestoKg} />
+                      </label>
+                      <select value={params.nivelCompuestoKg} onChange={e => {
+                        const newLevel = e.target.value;
+                        if (params.incluirResistente && newLevel !== '0.2') {
+                          // Si SikaWall está activo y el usuario elige otro nivel, se desactiva automáticamente
+                          setParams(prev => ({
+                            ...prev,
+                            nivelCompuestoKg: newLevel,
+                            incluirResistente: false,
+                            adherencia: false
+                          }));
+                          setResistenteMsg(''); // Limpia cualquier mensaje previo de SikaWall
+                        } else {
+                          setParams(prev => ({ ...prev, nivelCompuestoKg: newLevel }));
+                        }
+                      }} className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base bg-white">
+                        <option value="0.2">Nivel 1 – Oculto</option>
+                        <option value="0.45">Nivel 2 – Básico</option>
+                        <option value="0.75">Nivel 3 – Intermedio</option>
+                        <option value="1.0">Nivel 4 – Estándar</option>
+                        <option value="1.4">Nivel 5 – Premium</option>
+                      </select>
+                      {params.incluirResistente && parseFloat(params.nivelCompuestoKg) <= 0.2 && (
+                        <p className="text-xs text-primary/80 mt-1 animate-fadeIn">⚡ Optimizado por SikaWall (nivel 1)</p>
+                      )}
+                    </div>
+                  </div>
+                  {availablePanels().length > 0 && (
+                    <div className="mb-8">
+                      <label className="text-sm font-semibold text-secondary/80 mb-3 block">TIPO DE PANEL</label>
+                      <div className="grid grid-cols-1 gap-3">
+                        <div>
+                          <label className="text-xs text-secondary/50 mb-1 block">CARA A {params.factorCaras === '2' ? '' : ''}</label>
+                          <select value={params.selectedPanelA} onChange={e => setParams({...params, selectedPanelA: e.target.value})} className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base bg-white">
+                            {availablePanels().map(p => (<option key={p.clave} value={p.clave}>{p.desc || p.descripcion || p.clave}</option>))}
+                          </select>
+                        </div>
+                        {params.factorCaras === '2' && (
+                          <div>
+                            <label className="text-xs text-secondary/50 mb-1 block">CARA B</label>
+                            <select value={params.selectedPanelB} onChange={e => setParams({...params, selectedPanelB: e.target.value})} className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base bg-white">
+                              {availablePanels().map(p => (<option key={p.clave} value={p.clave}>{p.desc || p.descripcion || p.clave}</option>))}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  <div className="border-t border-secondary/10 pt-4 space-y-1">
+                    {selectedRecipe.permitir_secado_rapido && <ToggleSwitch checked={params.secadoRapido} onChange={e => setParams({...params, secadoRapido: e.target.checked})} label="Usar compuesto de secado rápido" tooltip="El compuesto seca en 45 min en lugar de 24 h. Ideal si tienes prisa." />}
+                  </div>
+                  <div className="flex justify-between mt-8">
+                    <button onClick={() => setStep(0)} className="flex items-center gap-2 border border-secondary/20 text-secondary px-5 py-3 rounded-xl font-semibold hover:bg-secondary/5 active:scale-95 transition-all">
+                      <ArrowLeft size={18} /> Volver
+                    </button>
+                    <button onClick={() => setStep(2)} className="flex items-center gap-2 bg-primary text-white px-6 py-3.5 rounded-xl font-semibold hover:bg-primary/90 active:scale-95 transition-all shadow-lg shadow-primary/20">
+                      Siguiente: Acabado <ArrowRight size={18} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ===== PASO 2: Acabado (antes Extras) – SikaWall primero, luego Pintura ===== */}
+              {step === 2 && (
+                <div className="bg-white rounded-3xl shadow-xl shadow-secondary/5 p-6 animate-fadeIn">
+                  <h3 className="text-lg font-bold text-secondary mb-2">✨ ¿QUIERES PROTEGER O DECORAR TÚ MURO?</h3>
+                  <p className="text-sm text-secondary/50 mb-6">Opciones adicionales para un acabado de primera.</p>
+                  <div className="space-y-3 mb-6">
+                    {/* ===== SIKAWALL PRIMERO ===== */}
+                    {selectedRecipe.permitir_resistente && (
+                      <div>
+                        <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-4 border border-primary/20">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Shield size={24} className="text-primary" />
+                              <div>
+                                <p className="text-sm font-semibold text-secondary">TECNOLOGÍA STUKA SIKAWALL</p>
+                                <p className="text-xs text-secondary/70">Refuerza tu muro contra grietas, golpes y humedad.</p>
+                              </div>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" checked={params.incluirResistente} onChange={e => handleToggleResistente(e.target.checked)} className="sr-only peer" />
+                              <div className="w-11 h-6 bg-secondary/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                          </div>
+                        </div>
+                        {resistenteMsg && (
+                          <div className="mt-3 bg-primary/5 border border-primary/30 rounded-xl p-3 text-xs text-primary/80 animate-fadeIn">
+                            {resistenteMsg}
+                          </div>
+                        )}
+                        {params.incluirResistente && (
+                          <div className="mt-3 space-y-3">
+                            <div className="p-4 bg-white rounded-2xl border border-primary/20 shadow-sm animate-fadeIn">
+                              {(() => {
+                                const claveSika = selectedRecipe.humedad ? 'S804601SC' : 'S804720SC';
+                                const sikaProduct = catalog.find(p => p.clave === claveSika);
+                                const descripcion = selectedRecipe.humedad
+                                  ? 'SikaWall®-151 Plus: Blindaje hidrófugo y acabado perfecto. Repele el agua de lluvia para evitar humedad y, gracias a sus fibras integradas, asegura un acabado liso que jamás se cuartea.'
+                                  : 'SikaWall®-131 Base: Muros más resistentes y sin grietas. Su fórmula con fibras refuerza la estructura del panel contra  grietas, golpes y humedad, evitando por completo que las juntas se cuarteen.';
+                                return (
+                                  <div className="flex items-center gap-4">
+                                    {sikaProduct?.imagen ? (
+                                      <img src={sikaProduct.imagen} alt={sikaProduct.descripcion || sikaProduct.clave} className="w-14 h-14 rounded-xl object-cover" />
+                                    ) : (
+                                      <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
+                                        <Shield size={24} className="text-primary" />
+                                      </div>
+                                    )}
+                                    <div className="flex-1">
+                                      <p className="text-sm font-semibold text-secondary">{sikaProduct?.descripcion || sikaProduct?.desc || 'SikaWall'}</p>
+                                      <p className="text-xs text-secondary/70 mt-0.5 leading-relaxed">{descripcion}</p>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+
+                            {/* Switch de adherencia Sikalatex (unificado) */}
+                            <ToggleSwitch
+                              checked={params.adherencia}
+                              onChange={e => setParams({...params, adherencia: e.target.checked})}
+                              label="Mejorar adherencia (Sikalatex N)"
+                              tooltip="Mezcla 200 ml por bulto de SikaWall + lechada superficial (diluir 3:1 con agua, 1 L rinde 20 m²)."
+                            />
+
+                            {params.adherencia && (
+                              <div className="p-4 bg-white rounded-2xl border border-primary/20 shadow-sm animate-fadeIn">
+                                {(() => {
+                                  const sikalatex = catalog.find(p => p.clave === 'S96657CU');
+                                  const imagenSikalatex = getProductImage(sikalatex);
+                                  return (
+                                    <div className="flex items-center gap-4">
+                                      {imagenSikalatex ? (
+                                        <img src={imagenSikalatex} alt={sikalatex?.descripcion || sikalatex?.clave} className="w-14 h-14 rounded-xl object-cover" />
+                                      ) : (
+                                        <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
+                                          <Sparkles size={24} className="text-primary" />
+                                        </div>
+                                      )}
+                                      <div className="flex-1">
+                                        <p className="text-sm font-semibold text-secondary">SIKALATEX N</p>
+                                        <p className="text-xs text-secondary/70 mt-0.5 leading-relaxed">
+                                          Mezcla 200 ml por bulto de SikaWall. Como lechada se diluye 3:1 con agua (1 L rinde 20 m²).
+                                        </p>
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ===== PINTURA DESPUÉS ===== */}
+                    {selectedRecipe.permitir_pintura && (
+                      <div className="p-4 bg-secondary/5 rounded-2xl">
+                        <ToggleSwitch checked={params.incluirPintura} onChange={e => setParams({...params, incluirPintura: e.target.checked})} label="Pintar el muro" tooltip="Elige el tipo de pintura y superficie. Se recomienda añadir sellador para mejor rendimiento y durabilidad de la pintura." />
+                        {params.incluirPintura && (
+                          <div className="mt-4 space-y-3 animate-fadeIn">
+                            <div>
+                              <label className="text-xs text-secondary/50 mb-2 block">Tipo de pintura</label>
+                              <div className="grid grid-cols-2 gap-2">
+                                {catalog.filter(p => p.tipo === 'pintura').map(p => (
+                                  <button
+                                    key={p.clave}
+                                    onClick={() => setParams({...params, pinturaSeleccionada: p.clave})}
+                                    className={`relative flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
+                                      params.pinturaSeleccionada === p.clave ? 'border-primary bg-primary/5 shadow-md' : 'border-secondary/10 hover:border-primary/50'
+                                    }`}
+                                  >
+                                    {p.imagen ? (
+                                      <img src={p.imagen} alt={p.desc || p.clave} className="w-16 h-16 object-cover rounded-lg mb-2" />
+                                    ) : (
+                                      <div className="w-16 h-16 bg-secondary/10 rounded-lg flex items-center justify-center mb-2">
+                                        <PaintBucket size={24} className="text-secondary/40" />
+                                      </div>
+                                    )}
+                                    <span className="text-xs text-secondary/70 text-center leading-tight">{p.descripcion || p.desc || p.clave}</span>
+                                    {params.pinturaSeleccionada === p.clave && (
+                                      <CheckCircle size={16} className="absolute top-2 right-2 text-primary" />
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                              {params.pinturaSeleccionada && (
+                                <p className="text-xs text-secondary/60 mt-2 bg-white rounded-lg p-2">
+                                  {catalog.find(p => p.clave === params.pinturaSeleccionada)?.descripcion || ''}
+                                </p>
+                              )}
+                            </div>
+                            <div>
+                              <label className="text-xs text-secondary/50 mb-1 inline-flex items-center gap-1">
+                                Superficie
+                                <span className="relative group cursor-help">
+                                  <HelpCircle size={12} className="text-secondary/40 hover:text-primary transition-colors" />
+                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 bg-secondary text-white text-xs rounded-xl p-2 shadow-lg z-10 leading-relaxed">
+                                    Con superficie sin sellador, el rendimiento de la pintura se reduce considerablemente y necesitarás más producto.
+                                  </span>
+                                </span>
+                              </label>
+                              <select value={params.superficie} onChange={e => setParams({...params, superficie: e.target.value})} className="w-full rounded-xl border-secondary/20 px-3 py-3 text-secondary focus:ring-2 focus:ring-primary/50 transition-shadow text-base bg-white">
+                                <option value="lisa">Sellador (añadir sellador)</option>
+                                <option value="rugosa">Sin sellador</option>
+                              </select>
+                            </div>
+                            {params.superficie === 'lisa' && (
+                              <div className="animate-fadeIn">
+                                <label className="text-xs text-secondary/50 mb-2 block">Sellador</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {catalog.filter(p => p.tipo === 'sellador').map(p => (
+                                    <button
+                                      key={p.clave}
+                                      onClick={() => setParams({...params, selladorSeleccionado: p.clave})}
+                                      className={`relative flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
+                                        params.selladorSeleccionado === p.clave ? 'border-primary bg-primary/5 shadow-md' : 'border-secondary/10 hover:border-primary/50'
+                                      }`}
+                                    >
+                                      {p.imagen ? (
+                                        <img src={p.imagen} alt={p.desc || p.clave} className="w-16 h-16 object-cover rounded-lg mb-2" />
+                                      ) : (
+                                        <div className="w-16 h-16 bg-secondary/10 rounded-lg flex items-center justify-center mb-2">
+                                          <PaintBucket size={24} className="text-secondary/40" />
+                                        </div>
+                                      )}
+                                      <span className="text-xs text-secondary/70 text-center leading-tight">{p.descripcion || p.desc || p.clave}</span>
+                                      {params.selladorSeleccionado === p.clave && (
+                                        <CheckCircle size={16} className="absolute top-2 right-2 text-primary" />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                                {params.selladorSeleccionado && (
+                                  <p className="text-xs text-secondary/60 mt-2 bg-white rounded-lg p-2">
+                                    {catalog.find(p => p.clave === params.selladorSeleccionado)?.descripcion || ''}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-between mt-8">
+                    <button onClick={() => setStep(1)} className="flex items-center gap-2 border border-secondary/20 text-secondary px-5 py-3 rounded-xl font-semibold hover:bg-secondary/5 active:scale-95 transition-all">
+                      <ArrowLeft size={18} /> Volver
+                    </button>
+                    <button onClick={handleCalculate} disabled={isCalculating} className="flex items-center gap-2 bg-primary text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-primary/90 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-70">
+                      {isCalculating ? (
+                        <><Loader2 size={18} className="animate-spin" /> Calculando…</>
+                      ) : (
+                        <>Calcular materiales <ArrowRight size={18} /></>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
+
+      {errorMsg && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-red-50 border border-red-300 rounded-xl px-4 py-3 shadow-lg animate-fadeIn">
+          <AlertCircle size={18} className="text-red-600" />
+          <span className="text-sm text-red-800">{errorMsg}</span>
+        </div>
+      )}
+
+      {modalAbertura && (
+        <AberturaModal tipo={modalAbertura} onAdd={(dim) => addAbertura(modalAbertura, dim)} onClose={() => setModalAbertura(null)} />
+      )}
+
+      {showToast && (
+        <div className="fixed bottom-6 right-6 bg-green-50 border border-green-300 rounded-2xl px-5 py-4 shadow-2xl flex items-center gap-3 animate-fadeIn z-50">
+          <CheckCircle size={20} className="text-green-600" />
+          <span className="text-sm font-medium text-green-800">¡Listo! Materiales calculados</span>
+        </div>
+      )}
+
+      {results && (
+        <div className="mt-8 animate-fadeIn">
+          <button onClick={handleBackToForm} className="mb-6 flex items-center gap-2 text-primary hover:underline text-sm font-medium">
+            ← Ajustar opciones
+          </button>
+          <ResultsSimple materials={results} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\Layout.jsx
+=======================================================================
+import { Settings } from 'lucide-react';
+
+export default function Layout({ children, onSettingsClick }) {
+  return (
+    <div className="min-h-screen bg-white flex flex-col items-center font-sans">
+      <header className="w-full flex justify-end p-4 md:p-6">
+        <button onClick={onSettingsClick} className="opacity-40 hover:opacity-80 transition-opacity" title="Configuración">
+          <Settings className="w-5 h-5 text-secondary" />
+        </button>
+      </header>
+      <main className="w-full max-w-3xl px-4 sm:px-6 lg:px-8 flex-1 flex flex-col items-center pt-8">
+        {children}
+      </main>
+      <footer className="w-full text-center py-4 text-xs text-secondary/40">Calculadora de Drywall • v1.0</footer>
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\LoginModal.jsx
+=======================================================================
+import { useState } from 'react';
+import { X } from 'lucide-react';
+import { login } from '../api';
+
+export default function LoginModal({ onLogin, onClose }) {
+  const [user, setUser] = useState('');
+  const [pass, setPass] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const result = await login(user, pass);
+    if (result.success) {
+      onLogin();
+    } else {
+      setError('Credenciales incorrectas');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-secondary">Acceso administrador</h2>
+          <button onClick={onClose} className="text-secondary/50 hover:text-secondary"><X size={20} /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input type="text" placeholder="Usuario" value={user} onChange={e => setUser(e.target.value)} className="w-full rounded-xl border-secondary/20 px-4 py-2 text-secondary" />
+          <input type="password" placeholder="Contraseña" value={pass} onChange={e => setPass(e.target.value)} className="w-full rounded-xl border-secondary/20 px-4 py-2 text-secondary" />
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <button type="submit" className="w-full bg-primary text-white py-2 rounded-xl font-semibold hover:bg-primary/90">Ingresar</button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\ResultCard.jsx
+=======================================================================
+import { Package, Columns, Circle, Link2, PaintBucket } from 'lucide-react';
+
+const ICON_MAP = {
+  placas: Package,
+  perfiles: Columns,
+  tornillos: Circle,
+  cinta: Link2,
+  masilla: PaintBucket,
+};
+
+export default function ResultCard({ label, value, unit, materialKey }) {
+  const IconComponent = ICON_MAP[materialKey] || Package;
+
+  return (
+    <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+        <IconComponent className="w-6 h-6 text-primary" />
+      </div>
+      <h3 className="text-sm font-medium text-secondary/80 uppercase tracking-wide mb-1">
+        {label}
+      </h3>
+      <p className="text-3xl font-bold text-secondary">
+        {value}
+      </p>
+      <span className="text-xs text-secondary/50 mt-1">{unit}</span>
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\ResultsAdvanced.jsx
+=======================================================================
+export default function ResultsAdvanced({ results }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mt-6">
+      <h2 className="text-xl font-semibold text-secondary mb-4">Resumen de materiales</h2>
+      <div className="grid gap-3">
+        <ResultRow label="Área neta" value={`${results.areaNeta.toFixed(2)} m²`} />
+        <ResultRow label="Postes" value={results.postes} product={results.posteProducto} />
+        <ResultRow label="Canales (soleras)" value={results.canales} product={results.canalProducto} />
+        <ResultRow label="Cabezales (puertas/ventanas)" value={results.cabezales} product={results.cabezalProducto} />
+        <ResultRow label="Paneles" value={results.paneles} product={results.panelProducto} />
+        <ResultRow label="Tornillos" value={results.tornillos} product={results.tornilloProducto} />
+        <ResultRow label="Compuesto" value={`${results.compuesto} kg`} product={results.compuestoProducto} />
+        <ResultRow label="Cinta" value={`${results.cinta} m`} product={results.cintaProducto} />
+      </div>
+    </div>
+  );
+}
+
+function ResultRow({ label, value, product }) {
+  return (
+    <div className="flex justify-between items-center py-2 border-b border-secondary/10 last:border-0">
+      <div>
+        <span className="font-medium text-secondary">{label}</span>
+        {product && (
+          <div className="text-xs text-secondary/50">
+            <span className="font-mono mr-1">({product.clave})</span>
+            {product.desc}
+          </div>
+        )}
+      </div>
+      <span className="text-secondary font-semibold">{value}</span>
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\ResultsSimple.jsx
+=======================================================================
+function formatUnit(quantity, unit) {
+  if (unit === 'pieza' || unit === 'pza(s)') {
+    return quantity === 1 ? 'pieza' : 'piezas';
+  }
+  return unit;
+}
+
+export default function ResultsSimple({ materials }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-lg p-6">
+      <h2 className="text-xl font-semibold text-secondary mb-4">Materiales calculados</h2>
+      <ul className="space-y-3">
+        {materials.map((item, idx) => (
+          <li key={idx} className="flex justify-between items-center border-b border-secondary/10 pb-2">
+            <div>
+              <span className="font-medium text-secondary">
+                {item.product.desc || item.product.descripcion || item.product.clave}
+              </span>
+              <div className="text-xs text-secondary/50 font-mono">{item.product.clave}</div>
+            </div>
+            <span className="text-secondary font-semibold">
+              {item.quantity} {formatUnit(item.quantity, item.unit)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\components\SettingsIcon.jsx
+=======================================================================
+import { Settings } from 'lucide-react';
+
+export default function SettingsIcon({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="opacity-40 hover:opacity-80 transition-opacity duration-300"
+      title="Configuración (administrador)"
+      aria-label="Abrir configuración"
+    >
+      <Settings className="w-5 h-5 text-secondary" />
+    </button>
+  );
+}
+
+=======================================================================
+ARCHIVO: src\index.css
+=======================================================================
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0092ff;
+  --color-secondary: #031d56;
+  --font-sans: 'Montserrat', sans-serif;
+  --radius-2xl: 1rem;
+}
+
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+=======================================================================
+ARCHIVO: src\main.jsx
+=======================================================================
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
+import './index.css';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
+
+=======================================================================
+ARCHIVO: src\utils\calculations.js
+=======================================================================
+/**
+ * Rendimientos de materiales para construcción en seco (drywall).
+ * Valores por defecto basados en prácticas estándar de la industria.
+ * Posteriormente serán editables desde el panel de administración.
+ */
+const DEFAULT_YIELDS = {
+  placaM2: 2.88,          // 1 placa cubre 2.88 m² (1.20 m x 2.40 m)
+  perfilesPorM2: 2.2,     // perfiles (soleras + montantes) estimados por m²
+  tornillosPorPlaca: 12,  // tornillos necesarios por cada placa
+  cintaMetrosPorM2: 1.5,  // metros de cinta de papel por m²
+  masillaKgPorM2: 0.3,    // kilogramos de masilla por m²
+};
+
+/**
+ * Calcula la cantidad de materiales necesarios para un área dada.
+ * @param {number} area - Metros cuadrados a cubrir.
+ * @param {object} [yields=DEFAULT_YIELDS] - Rendimientos personalizados.
+ * @returns {object} Objeto con las cantidades calculadas.
+ */
+export function calculateMaterials(area, yields = DEFAULT_YIELDS) {
+  if (!area || area <= 0) return null;
+
+  const placas = Math.ceil(area / yields.placaM2);
+  const perfiles = Math.ceil(area * yields.perfilesPorM2);
+  const tornillos = Math.ceil(placas * yields.tornillosPorPlaca);
+  const cinta = Math.ceil(area * yields.cintaMetrosPorM2);
+  const masilla = Math.ceil(area * yields.masillaKgPorM2 * 10) / 10; // un decimal
+
+  return {
+    placas,
+    perfiles,
+    tornillos,
+    cinta,
+    masilla,
+  };
+}
+
+/**
+ * Obtiene los rendimientos almacenados en localStorage o los por defecto.
+ */
+export function getStoredYields() {
+  try {
+    const stored = localStorage.getItem('drywall_yields');
+    return stored ? JSON.parse(stored) : { ...DEFAULT_YIELDS };
+  } catch {
+    return { ...DEFAULT_YIELDS };
+  }
+}
+
+=======================================================================
+ARCHIVO: src\utils\calculationsAdvanced.js
+=======================================================================
+function safeEval(expression, context) {
+  let sanitized = expression
+    .replace(/\bceil\b/g, 'Math.ceil')
+    .replace(/\bfloor\b/g, 'Math.floor')
+    .replace(/\bround\b/g, 'Math.round')
+    .replace(/\bmax\b/g, 'Math.max')
+    .replace(/\bmin\b/g, 'Math.min');
+  const allowed = /^[0-9+\-*/().%\s\w.]+$/;
+  if (!allowed.test(sanitized)) throw new Error('Expresión inválida');
+  const keys = Object.keys(context);
+  const values = Object.values(context);
+  const func = new Function(...keys, `return ${sanitized};`);
+  return func(...values);
+}
+
+function findPosteByProfile(ancho, calibre, alto, catalog) {
+  const largoDeseado = alto <= 2.44 ? 2.44 : 3.05;
+  let poste = catalog.find(p => p && p.tipo === 'poste' && p.ancho === ancho && p.calibre === calibre && p.largo === largoDeseado);
+  if (poste) return poste;
+  return catalog.find(p => p && p.tipo === 'poste' && p.ancho === ancho && p.calibre === calibre) || null;
+}
+
+function findCanalByProfile(ancho, calibre, catalog) {
+  return catalog.find(p => p && p.tipo === 'canal' && p.ancho === ancho && p.calibre === calibre) || null;
+}
+
+function combinarCompuestos(kgNecesarios, compuestosDisponibles) {
+  const validos = compuestosDisponibles.filter(c => c && typeof c.kg === 'number');
+  if (validos.length === 0) return [];
+  const ordenados = [...validos].sort((a, b) => b.kg - a.kg);
+  const resultado = [];
+  let restante = kgNecesarios;
+
+  for (let i = 0; i < ordenados.length; i++) {
+    const c = ordenados[i];
+    if (restante <= 0) break;
+    const cant = Math.floor(restante / c.kg);
+    if (cant > 0) {
+      resultado.push({ product: c, quantity: cant });
+      restante -= cant * c.kg;
+    } else if (restante > 0 && restante > c.kg * 0.5) {
+      resultado.push({ product: c, quantity: 1 });
+      restante = 0;
+      break;
+    }
+  }
+
+  if (restante > 0) {
+    const menor = ordenados[ordenados.length - 1];
+    const existente = resultado.find(r => r.product.clave === menor.clave);
+    if (existente) {
+      existente.quantity += Math.ceil(restante / menor.kg);
+    } else {
+      resultado.push({ product: menor, quantity: Math.ceil(restante / menor.kg) });
+    }
+  }
+
+  return resultado.filter(r => r.quantity > 0);
+}
+
+function getTornilloPanelClave(panelClave, calibre) {
+  if (panelClave === 'R500077') return 'R500231';
+  if (calibre === 20) return 'R500239';
+  switch (panelClave) {
+    case 'R804171': return 'R522020';
+    case 'R807609': case 'R800495': case 'R803499': return 'R500239';
+    default: return 'R522020';
+  }
+}
+
+function esPanelEspecial(panelClave) {
+  return ['R807609', 'R800495', 'R803499', 'R500077'].includes(panelClave);
+}
+
+function getResistenteClave(recipe) {
+  return recipe.humedad ? 'S804601SC' : 'S804720SC';
+}
+
+export function calculateFromRecipe(recipe, params, catalog) {
+  let cat = catalog.filter(p => p != null);
+
+  cat.forEach(p => {
+    if (p && p.tipo === 'compuesto') {
+      if (p.kg === undefined || p.kg === null) p.kg = 28;
+      if (p.rapido === undefined || p.rapido === null) p.rapido = false;
+      if (!p.formula) p.formula = '1';
+    }
+  });
+
+  const {
+    largo, alto, esquinas = 0,
+    puertas = [], ventanas = [],
+    separacionPostes,
+    factorCaras,
+    nivelCompuestoKg,
+    anchoPerfil,
+    calibre,
+    secadoRapido = false,
+    aislamiento = false,
+    refuerzos = false,
+    selectedPanelA,
+    selectedPanelB,
+    incluirPintura = false,
+    pinturaSeleccionada,
+    superficie,
+    selladorSeleccionado,
+    incluirResistente = false,
+    adherencia = false,
+    lechada = false,
+  } = params;
+
+  // ===== POSTES (solo laterales en aberturas) =====
+  const postesMuro = Math.ceil(largo / separacionPostes) + 1;
+  const largoPoste = alto <= 2.44 ? 2.44 : 3.05;
+
+  let postesAberturas = 0;
+  for (const p of puertas) {
+    postesAberturas += Math.ceil((p.alto || 2.1) * 2 / largoPoste);
+  }
+  for (const v of ventanas) {
+    postesAberturas += Math.ceil((v.alto || 1.0) * 2 / largoPoste);
+  }
+
+  let totalPostes = postesMuro + esquinas + postesAberturas;
+
+  // ===== POSTES EXTRA POR ALTURA (si el muro supera los 3.05 m) =====
+  if (alto > 3.05) {
+    const tramoRestante = alto - 3.05;
+    const desperdicio = 1.10;
+    const metrosExtras = totalPostes * tramoRestante * desperdicio;
+    const postesExtras = Math.ceil(metrosExtras / 3.05);
+    totalPostes += postesExtras;
+  }
+
+  // ===== ÁREAS =====
+  const areaMuro = largo * alto;
+  const areaPuertas = puertas.reduce((s, p) => s + (p.ancho || 0.9) * (p.alto || 2.1), 0);
+  const areaVentanas = ventanas.reduce((s, v) => s + (v.ancho || 1.2) * (v.alto || 1.0), 0);
+  const areaNeta = Math.max(0, areaMuro - areaPuertas - areaVentanas);
+  const areaTotalPanel = areaNeta * (factorCaras || 1);
+  const totalLargoCabezales = puertas.reduce((s, p) => s + (p.ancho || 0.9) + 0.2, 0) +
+                              ventanas.reduce((s, v) => s + (v.ancho || 1.2) * 2, 0);
+  const sumaAnchoPuertas = puertas.reduce((s, p) => s + (p.ancho || 0.9), 0);
+
+  // ===== PERÍMETRO DE ABERTURAS (esquineros) =====
+  let perimetroAberturas = 0;
+  for (const p of puertas) perimetroAberturas += (p.alto || 2.1) * 2 + (p.ancho || 0.9);
+  for (const v of ventanas) perimetroAberturas += (v.alto || 1.0) * 2 + (v.ancho || 1.2) * 2;
+
+  // ===== REFUERZOS HORIZONTALES =====
+  const espacios = Math.ceil(largo / separacionPostes);
+  const sumaAnchoAberturas = sumaAnchoPuertas + ventanas.reduce((s, v) => s + (v.ancho || 1.2), 0);
+  const huecosAberturas = sumaAnchoAberturas > 0 ? Math.ceil(sumaAnchoAberturas / separacionPostes) : 0;
+  const huecosEfectivos = Math.max(0, espacios - huecosAberturas);
+  const totalTramos = huecosEfectivos > 0
+    ? ((huecosEfectivos % 2 === 0) ? 1.5 * huecosEfectivos : 1.5 * huecosEfectivos - 0.5)
+    : 0;
+  const metrosRefuerzo = (recipe.permitir_refuerzos && refuerzos) ? totalTramos * separacionPostes : 0;
+  const extraFramer = (recipe.permitir_refuerzos && refuerzos) ? totalTramos * 4 : 0;
+
+  const context = {
+    largo, alto, esquinas, separacionPostes,
+    areaMuro, areaNeta, areaTotalPanel,
+    totalLargoCabezales,
+    puertas: puertas.length, ventanas: ventanas.length,
+    factorCaras,
+    anchoPerfil, calibre,
+    sumaAnchoPuertas,
+    metrosRefuerzo,
+    extraFramer,
+    perimetroAberturas,
+    totalPostes,
+  };
+
+  const finalProducts = [];
+
+  // Poste automático
+  if (anchoPerfil && calibre) {
+    const autoPoste = findPosteByProfile(anchoPerfil, calibre, alto, cat);
+    if (autoPoste) finalProducts.push({
+      product: autoPoste,
+      factor: 1,
+      customQuantity: totalPostes,
+      customUnit: 'pza(s)'
+    });
+  }
+
+  // Canal automático
+  if (anchoPerfil && calibre) {
+    const autoCanal = findCanalByProfile(anchoPerfil, calibre, cat);
+    if (autoCanal) finalProducts.push({ product: autoCanal, factor: 1 });
+  }
+
+  // Tornillo framer
+  if (anchoPerfil && calibre) {
+    const framerClave = calibre === 20 ? 'R500242' : 'R500259';
+    const tornilloFramer = cat.find(p => p.clave === framerClave);
+    if (tornilloFramer) {
+      const qtyFramer = Math.ceil((totalPostes * 5 + (puertas.length + ventanas.length) * 2 + extraFramer) * 1.1);
+      finalProducts.push({ product: tornilloFramer, factor: 1, customQuantity: qtyFramer, customUnit: 'pza(s)' });
+    }
+  }
+
+  // Reborde J
+  if (anchoPerfil && calibre) {
+    const rebordeJ = cat.find(p => p.clave === 'R800474');
+    if (rebordeJ) {
+      const largoEfectivo = Math.max(0, largo - sumaAnchoPuertas);
+      const qtyReborde = Math.ceil(largoEfectivo * (factorCaras || 1) / 3);
+      finalProducts.push({ product: rebordeJ, factor: 1, customQuantity: qtyReborde, customUnit: 'pza(s)' });
+    }
+  }
+
+  // Esquinero automático
+  if (esquinas > 0 || perimetroAberturas > 0) {
+    const claveEsquinero = recipe.humedad ? 'R500129' : 'R800479';
+    const esquinero = cat.find(p => p && p.clave === claveEsquinero);
+    if (esquinero) finalProducts.push({ product: esquinero, factor: 1 });
+  }
+
+  // Aislamiento
+  if (recipe.permitir_aislamiento && aislamiento) {
+    const aislamientoProd = cat.find(p => p.clave === 'R512831');
+    if (aislamientoProd) finalProducts.push({ product: aislamientoProd, factor: 1 });
+  }
+
+  // ===== MURO MÁS RESISTENTE =====
+  if (recipe.permitir_resistente && incluirResistente) {
+    const resistenteClave = getResistenteClave(recipe);
+    const resistenteProd = cat.find(p => p.clave === resistenteClave);
+    if (resistenteProd) {
+      const qty = Math.ceil(areaNeta * 1.1 / 9);
+      finalProducts.push({ product: resistenteProd, factor: 1, customQuantity: qty, customUnit: 'pieza' });
+    }
+  }
+
+  // ===== SIKALATEX N (adherencia + lechada) =====
+    // ===== SIKALATEX N (adherencia + lechada, unificado) =====
+  if (recipe.permitir_resistente && incluirResistente && adherencia) {
+    const bultosSika = Math.ceil(areaNeta * 1.1 / 9);
+    const litrosMezcla = bultosSika * 0.2; // 200 ml por bulto
+    const litrosLechada = areaNeta / 20;   // 1 L puro → 20 m² (diluido 3:1)
+    const litrosNecesarios = Math.ceil((litrosMezcla + litrosLechada) * 1.1 * 10) / 10;
+
+    const presentaciones = cat.filter(p => p && p.tipo === 'sikalatex_presentacion');
+    if (presentaciones.length > 0) {
+      const ordenadas = [...presentaciones].sort((a, b) => (b.litros || 0) - (a.litros || 0));
+      const combinacion = [];
+      let restante = litrosNecesarios;
+
+      for (const p of ordenadas) {
+        if (restante <= 0) break;
+        const cant = Math.floor(restante / (p.litros || 1));
+        if (cant > 0) {
+          combinacion.push({ product: p, quantity: cant });
+          restante -= cant * (p.litros || 1);
+        } else if (restante > 0 && restante > (p.litros || 1) * 0.5) {
+          combinacion.push({ product: p, quantity: 1 });
+          restante = 0;
+          break;
+        }
+      }
+
+      if (restante > 0) {
+        const menor = ordenadas[ordenadas.length - 1];
+        if (menor && menor.litros) {
+          const existente = combinacion.find(c => c.product.clave === menor.clave);
+          if (existente) {
+            existente.quantity += Math.ceil(restante / menor.litros);
+          } else {
+            combinacion.push({ product: menor, quantity: Math.ceil(restante / menor.litros) });
+          }
+        }
+      }
+
+      for (const { product, quantity } of combinacion) {
+        finalProducts.push({
+          product,
+          factor: 1,
+          customQuantity: quantity,
+          customUnit: 'pza(s)',
+        });
+      }
+    }
+  }
+
+  // ===== PANELES Y SUS MATERIALES ASOCIADOS =====
+  const panelA = selectedPanelA ? cat.find(p => p.clave === selectedPanelA) : null;
+  const panelB = selectedPanelB ? cat.find(p => p.clave === selectedPanelB) : null;
+  const faces = factorCaras || 1;
+
+  const areaUnaCara = Math.ceil(areaNeta / 2.9768) * 1.1;
+  const processedClaves = new Set();
+  const tornillosAuto = new Set();
+  const usarSeleccionPaneles = !!(selectedPanelA || selectedPanelB);
+
+  let totalCintaPapel = 0;
+  let totalCintaFibra = 0;
+  let totalKgCompuesto = 0;
+  let totalKgBaseCoatHumedo = 0;
+  let totalKgBaseCoatSeco = 0;
+
+  function procesarPanel(panelClave, cantidadPaneles, esDobleCara) {
+    const product = cat.find(p => p.clave === panelClave);
+    if (!product) return;
+    finalProducts.push({ product, factor: 1, customQuantity: cantidadPaneles, customUnit: 'pza(s)' });
+    processedClaves.add(panelClave);
+
+    const tornilloClave = getTornilloPanelClave(panelClave, calibre);
+    const tornillo = cat.find(p => p.clave === tornilloClave);
+    if (tornillo) {
+      const tasa = panelClave === 'R500077' ? 20 : 17;
+      const areaParaTornillo = esDobleCara ? areaNeta * 2 : areaNeta;
+      const qtyTornillo = Math.ceil(areaParaTornillo * tasa * 1.1);
+      const existente = finalProducts.find(p => p.product.clave === tornilloClave);
+      if (existente) {
+        existente.customQuantity += qtyTornillo;
+      } else {
+        finalProducts.push({ product: tornillo, factor: 1, customQuantity: qtyTornillo, customUnit: 'pza(s)' });
+      }
+      tornillosAuto.add(tornilloClave);
+    }
+
+    if (esPanelEspecial(panelClave)) {
+      totalCintaFibra += areaNeta * (esDobleCara ? 2 : 1);
+      if (recipe.humedad) {
+        totalKgBaseCoatHumedo += areaNeta * (esDobleCara ? 2 : 1);
+      } else {
+        totalKgBaseCoatSeco += areaNeta * (esDobleCara ? 2 : 1);
+      }
+    } else {
+      totalCintaPapel += areaNeta * (esDobleCara ? 2 : 1);
+      totalKgCompuesto += areaNeta * (esDobleCara ? 2 : 1) * (nivelCompuestoKg || 1.5);
+    }
+  }
+
+  if (panelA && faces >= 1) {
+    const mismaCara = (faces >= 2 && panelB && panelB.clave === panelA.clave);
+    let cantidad = Math.ceil(areaUnaCara);
+    if (mismaCara) {
+      cantidad *= 2;
+    }
+    procesarPanel(panelA.clave, cantidad, mismaCara);
+  }
+
+  if (faces >= 2 && panelB && panelB.clave !== panelA?.clave) {
+    procesarPanel(panelB.clave, Math.ceil(areaUnaCara), false);
+  }
+
+  // ===== CINTA Y COMPUESTO (AJUSTADOS) =====
+  if (totalCintaPapel > 0) {
+    const cinta = cat.find(p => p.clave === 'R800195');
+    if (cinta) {
+      const rollos = Math.ceil(totalCintaPapel * 2.5 / 76.25);
+      finalProducts.push({ product: cinta, factor: 1, customQuantity: rollos, customUnit: 'pieza' });
+    }
+  }
+
+  if (totalCintaFibra > 0) {
+    const cinta = cat.find(p => p.clave === 'R500081');
+    if (cinta) {
+      const rollos = Math.ceil(totalCintaFibra * 2.5 / 46);
+      finalProducts.push({ product: cinta, factor: 1, customQuantity: rollos, customUnit: 'pieza' });
+    }
+  }
+
+  if (totalKgCompuesto > 0) {
+    const kgNecesarios = Math.ceil(totalKgCompuesto * 10) / 10;
+    const usarRapido = recipe.permitir_secado_rapido && secadoRapido;
+    const compuestosDisponibles = cat.filter(p => p && p.tipo === 'compuesto' && !!p.rapido === usarRapido);
+    const combinacion = combinarCompuestos(kgNecesarios, compuestosDisponibles);
+    for (const { product, quantity } of combinacion) {
+      finalProducts.push({ product, factor: 1, customQuantity: quantity, customUnit: 'pieza' });
+    }
+  }
+
+  if (totalKgBaseCoatHumedo > 0) {
+    const qty = Math.ceil(totalKgBaseCoatHumedo * 1.1 / 8);
+    const baseCoat = cat.find(p => p.clave === 'R802010');
+    if (baseCoat) finalProducts.push({ product: baseCoat, factor: 1, customQuantity: qty, customUnit: 'pieza' });
+  }
+
+  if (totalKgBaseCoatSeco > 0) {
+    const qty = Math.ceil(totalKgBaseCoatSeco * 1.1 / 6);
+    const baseCoat = cat.find(p => p.clave === 'R808279');
+    if (baseCoat) finalProducts.push({ product: baseCoat, factor: 1, customQuantity: qty, customUnit: 'pieza' });
+  }
+
+  // ===== PINTURA (con nuevos rendimientos) =====
+  if (recipe.permitir_pintura && incluirPintura && pinturaSeleccionada && superficie) {
+    const rendimientoPintura = {
+      'O1595CU': { lisa: 12, rugosa: 7 },
+      'O1121LT': { lisa: 4.5, rugosa: 2.5 },
+      'O1021CU': { lisa: 7.5, rugosa: 4 },
+      'O1360LT': { lisa: 11, rugosa: 6 },
+      'O1821LT': { lisa: 11.5, rugosa: 6.5 },
+    };
+    const rend = rendimientoPintura[pinturaSeleccionada]?.[superficie];
+    if (rend) {
+      const areaAPintar = areaNeta * (factorCaras || 1);
+      const litrosNecesarios = Math.ceil(areaAPintar / rend * 1.1 * 10) / 10;
+      const presentaciones = cat.filter(p => p && p.tipo === 'pintura_presentacion' && p.presentacion_de === pinturaSeleccionada);
+      if (presentaciones.length > 0) {
+        const presentacionesAdaptadas = presentaciones.map(p => ({ ...p, kg: p.litros }));
+        const combinacion = combinarCompuestos(litrosNecesarios, presentacionesAdaptadas);
+        for (const { product, quantity } of combinacion) {
+          finalProducts.push({ product, factor: 1, customQuantity: quantity, customUnit: 'pza(s)' });
+        }
+      }
+    }
+  }
+
+  // ===== SELLADOR (corregido) =====
+  if (recipe.permitir_pintura && incluirPintura && superficie === 'lisa' && selladorSeleccionado) {
+    const rendimientoSellador = 35; // m²/L
+    const areaAPintar = areaNeta * (factorCaras || 1);
+    const litrosNecesarios = Math.ceil(areaAPintar / rendimientoSellador * 1.1 * 10) / 10;
+
+    const presentaciones = cat.filter(p => p && p.tipo === 'sellador_presentacion' && p.presentacion_de === selladorSeleccionado);
+    if (presentaciones.length > 0) {
+      const ordenadas = [...presentaciones].sort((a, b) => (b.litros || 0) - (a.litros || 0));
+      const combinacion = [];
+      let restante = litrosNecesarios;
+
+      for (const p of ordenadas) {
+        if (restante <= 0) break;
+        const cant = Math.floor(restante / (p.litros || 1));
+        if (cant > 0) {
+          combinacion.push({ product: p, quantity: cant });
+          restante -= cant * (p.litros || 1);
+        } else if (restante > 0 && restante > (p.litros || 1) * 0.5) {
+          combinacion.push({ product: p, quantity: 1 });
+          restante = 0;
+          break;
+        }
+      }
+
+      if (restante > 0) {
+        const menor = ordenadas[ordenadas.length - 1];
+        if (menor && menor.litros) {
+          const existente = combinacion.find(c => c.product.clave === menor.clave);
+          if (existente) {
+            existente.quantity += Math.ceil(restante / menor.litros);
+          } else {
+            combinacion.push({ product: menor, quantity: Math.ceil(restante / menor.litros) });
+          }
+        }
+      }
+
+      for (const { product, quantity } of combinacion) {
+        finalProducts.push({
+          product,
+          factor: 1,
+          customQuantity: quantity,
+          customUnit: 'pza(s)',
+        });
+      }
+    }
+  }
+
+  // ===== RESTO DE PRODUCTOS DE LA RECETA =====
+  for (const item of recipe.productos) {
+    const product = cat.find(p => p && p.clave === item.clave);
+    if (!product) continue;
+
+    if (usarSeleccionPaneles && product.tipo === 'panel') continue;
+    if (tornillosAuto.has(product.clave)) continue;
+    if (['R800195', 'R500081', 'R802010', 'R808279'].includes(product.clave) && usarSeleccionPaneles) continue;
+    if (product.tipo === 'compuesto' && usarSeleccionPaneles) continue;
+
+    if (product.tipo === 'poste' && anchoPerfil) continue;
+    if (product.tipo === 'canal' && anchoPerfil) continue;
+    if (product.tipo === 'esquinero') continue;
+    if (product.tipo === 'tornillo_framer') continue;
+    if (product.tipo === 'aislamiento') continue;
+    if (product.tipo === 'reborde') continue;
+
+    finalProducts.push({ product, factor: item.factor || 1 });
+  }
+
+  const results = [];
+  for (const { product, factor, customQuantity, customUnit } of finalProducts) {
+    let quantity;
+    try {
+      quantity = customQuantity !== undefined ? customQuantity : safeEval(product.formula, context);
+    } catch (e) {
+      console.error(`Error en fórmula de ${product.clave}:`, e);
+      quantity = 0;
+    }
+    if (customQuantity === undefined) quantity = Math.ceil(quantity * (factor || 1));
+    results.push({
+      product,
+      quantity,
+      unit: customUnit || product.unidad,
+    });
+  }
+
+  return results;
+}
+
+=======================================================================
+ARCHIVO: vite.config.js
+=======================================================================
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+})
+
+=======================================================================
+ARCHIVO: worker\src\index.js
+=======================================================================
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+    const method = request.method;
+
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
+
+    if (method === 'OPTIONS') {
+      return new Response(null, { headers: corsHeaders });
+    }
+
+    try {
+      // ==================== CATÁLOGO ====================
+      if (path === '/api/catalog' && method === 'GET') {
+        const { results } = await env.DB.prepare(
+          'SELECT clave, descripcion AS desc, tipo, unidad, marca, ancho, calibre, largo, kg, rapido, formula, litros, presentacion_de, imagen FROM catalog'
+        ).all();
+        return Response.json(results, { headers: corsHeaders });
+      }
+
+      if (path === '/api/catalog' && method === 'POST') {
+        const body = await request.json();
+        await env.DB.prepare(
+          'INSERT OR REPLACE INTO catalog (clave, descripcion, tipo, unidad, marca, ancho, calibre, largo, kg, rapido, formula, litros, presentacion_de, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        ).bind(
+          body.clave, body.desc || body.descripcion, body.tipo, body.unidad, body.marca || '',
+          body.ancho || null, body.calibre || null, body.largo || null,
+          body.kg || null, body.rapido || 0, body.formula || '',
+          body.litros || null, body.presentacion_de || null, body.imagen || ''
+        ).run();
+        return Response.json({ success: true }, { headers: corsHeaders });
+      }
+
+      if (path.startsWith('/api/catalog/') && method === 'PUT') {
+        const clave = path.split('/')[3];
+        const body = await request.json();
+        await env.DB.prepare(
+          'UPDATE catalog SET descripcion=?, tipo=?, unidad=?, marca=?, ancho=?, calibre=?, largo=?, kg=?, rapido=?, formula=?, litros=?, presentacion_de=?, imagen=? WHERE clave=?'
+        ).bind(
+          body.desc || body.descripcion, body.tipo, body.unidad, body.marca || '',
+          body.ancho || null, body.calibre || null, body.largo || null,
+          body.kg || null, body.rapido || 0, body.formula || '',
+          body.litros || null, body.presentacion_de || null, body.imagen || '', clave
+        ).run();
+        return Response.json({ success: true }, { headers: corsHeaders });
+      }
+
+      if (path.startsWith('/api/catalog/') && method === 'DELETE') {
+        const clave = path.split('/')[3];
+        await env.DB.prepare('DELETE FROM catalog WHERE clave = ?').bind(clave).run();
+        return Response.json({ success: true }, { headers: corsHeaders });
+      }
+
+      // ==================== RECETAS ====================
+      if (path === '/api/recipes' && method === 'GET') {
+        const { results } = await env.DB.prepare('SELECT * FROM recipes').all();
+        return Response.json(results, { headers: corsHeaders });
+      }
+
+      if (path === '/api/recipes' && method === 'POST') {
+        const body = await request.json();
+        const { meta } = await env.DB.prepare(
+          'INSERT INTO recipes (name, humedad, permitir_secado_rapido, permitir_aislamiento, permitir_refuerzos, permitir_pintura, permitir_resistente, imagen, productos) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        ).bind(
+          body.name, body.humedad || 0, body.permitir_secado_rapido || 0,
+          body.permitir_aislamiento || 0, body.permitir_refuerzos || 0,
+          body.permitir_pintura || 0, body.permitir_resistente || 0,
+          body.imagen || '', JSON.stringify(body.productos || [])
+        ).run();
+        return Response.json({ success: true, id: meta.last_row_id }, { headers: corsHeaders });
+      }
+
+      if (path.startsWith('/api/recipes/') && method === 'PUT') {
+        const id = path.split('/')[3];
+        const body = await request.json();
+        await env.DB.prepare(
+          'UPDATE recipes SET name=?, humedad=?, permitir_secado_rapido=?, permitir_aislamiento=?, permitir_refuerzos=?, permitir_pintura=?, permitir_resistente=?, imagen=?, productos=? WHERE id=?'
+        ).bind(
+          body.name, body.humedad || 0, body.permitir_secado_rapido || 0,
+          body.permitir_aislamiento || 0, body.permitir_refuerzos || 0,
+          body.permitir_pintura || 0, body.permitir_resistente || 0,
+          body.imagen || '', JSON.stringify(body.productos || []), id
+        ).run();
+        return Response.json({ success: true }, { headers: corsHeaders });
+      }
+
+      if (path.startsWith('/api/recipes/') && method === 'DELETE') {
+        const id = path.split('/')[3];
+        await env.DB.prepare('DELETE FROM recipes WHERE id = ?').bind(id).run();
+        return Response.json({ success: true }, { headers: corsHeaders });
+      }
+
+      // ==================== PROYECTOS ====================
+      if (path === '/api/projects' && method === 'GET') {
+        const { results } = await env.DB.prepare('SELECT * FROM projects ORDER BY created_at DESC').all();
+        return Response.json(results, { headers: corsHeaders });
+      }
+
+      if (path === '/api/projects' && method === 'POST') {
+        const body = await request.json();
+        await env.DB.prepare(
+          'INSERT INTO projects (name, fecha, inputs, results) VALUES (?, ?, ?, ?)'
+        ).bind(body.name, body.fecha, JSON.stringify(body.inputs), JSON.stringify(body.results)).run();
+        return Response.json({ success: true }, { headers: corsHeaders });
+      }
+
+      if (path.startsWith('/api/projects/') && method === 'DELETE') {
+        const id = path.split('/')[3];
+        await env.DB.prepare('DELETE FROM projects WHERE id = ?').bind(id).run();
+        return Response.json({ success: true }, { headers: corsHeaders });
+      }
+
+      // ==================== SUBIDA DE IMÁGENES ====================
+      if (path === '/api/upload' && method === 'POST') {
+        const formData = await request.formData();
+        const file = formData.get('file');
+        if (!file || !file.name) {
+          return Response.json({ error: 'No se envió ningún archivo' }, { status: 400, headers: corsHeaders });
+        }
+
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+          return Response.json({ error: 'Solo se permiten imágenes PNG, JPG o WebP' }, { status: 400, headers: corsHeaders });
+        }
+
+        const extension = file.name.split('.').pop();
+        const key = `${Date.now()}-${Math.random().toString(36).substring(2)}.${extension}`;
+
+        await env.IMAGENES.put(key, file.stream(), {
+          httpMetadata: { contentType: file.type },
+        });
+
+        const publicUrl = `https://drywall-api.adrian-valle-a.workers.dev/images/${key}`;
+        return Response.json({ success: true, url: publicUrl }, { headers: corsHeaders });
+      }
+
+      // ==================== SERVIR IMÁGENES ====================
+      if (path.startsWith('/images/') && method === 'GET') {
+        const key = path.split('/images/')[1];
+        if (!key) {
+          return new Response('Not Found', { status: 404 });
+        }
+
+        const object = await env.IMAGENES.get(key);
+        if (!object) {
+          return new Response('Not Found', { status: 404 });
+        }
+
+        const headers = new Headers();
+        object.writeHttpMetadata(headers);
+        headers.set('etag', object.httpEtag);
+        headers.set('Cache-Control', 'public, max-age=31536000');
+        return new Response(object.body, { headers });
+      }
+
+      // ==================== LOGIN ====================
+      if (path === '/api/login' && method === 'POST') {
+        const body = await request.json();
+        if (body.user === 'admin' && body.pass === 'admin123') {
+          return Response.json({ success: true }, { headers: corsHeaders });
+        }
+        return Response.json({ success: false }, { status: 401, headers: corsHeaders });
+      }
+
+      return Response.json({ error: 'Not found' }, { status: 404, headers: corsHeaders });
+
+    } catch (err) {
+      return new Response(JSON.stringify({ error: err.message }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+  }
+};
+
