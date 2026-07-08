@@ -9,32 +9,31 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      // Agregamos tus nuevos iconos a los assets incluidos en la caché offline
       includeAssets: ['logo.png', 'pwa-192x192.png', 'pwa-512x512.png', 'reveal-sound.mp3'], 
       manifest: {
         name: 'Cuantificador OBS',
         short_name: 'CuantificadorOBS',
         description: 'Calculadora PWA para cuantificación de materiales OBS',
-        theme_color: '#031d56', // 🛠️ Cambiado al azul corporativo para que la barra de notificaciones del cel combine
+        theme_color: '#031d56',
         background_color: '#ffffff',
-        display: 'standalone', // Abre la app a pantalla completa sin barras del navegador
+        display: 'standalone',
         orientation: 'portrait',
         icons: [
           {
-            src: 'pwa-192x192.png', // 👈 Tu nuevo icono con fondo sólido y margen seguro
+            src: 'pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable' // Permite a Android adaptarlo a formas circulares/cuadradas sin romperlo
+            purpose: 'any maskable'
           },
           {
-            src: 'pwa-512x512.png', // 👈 Tu nuevo icono de alta resolución
+            src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
           }
         ]
       }
-    ])
+    }) // 👈 Aquí estaba el detalle, faltaba cerrar correctamente el paréntesis de VitePWA
   ],
-  base: '/cuantificador-obs/', // Esto le dice a Vite que el proyecto se sube a tu repositorio específico
+  base: '/cuantificador-obs/',
 })
