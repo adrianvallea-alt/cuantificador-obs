@@ -709,13 +709,13 @@ export function calculatePlafon(params, catalog) {
       }
 
       const kgNecesarios = areaPlafon * (incluirResistente ? 0.2 : nivelCompuestoKg);
-      const compuestosDisponibles = catalog.filter(p => p && p.tipo === 'compuesto' && !!p.rapido === secadoRapido);
-      let (compuestosDisponibles.length === 0) {
-        compuestosDisponibles = catalog.filter(p => p && p.tipo === 'compuesto' && !p.rapido);
-      }
-      if (compuestosDisponibles.length === 0) {
-        compuestosDisponibles = catalog.filter(p => p && p.tipo === 'compuesto');
-      }
+     let compuestosDisponibles = catalog.filter(p => p && p.tipo === 'compuesto' && !!p.rapido === secadoRapido);
+if (compuestosDisponibles.length === 0) {
+  compuestosDisponibles = catalog.filter(p => p && p.tipo === 'compuesto' && !p.rapido);
+}
+if (compuestosDisponibles.length === 0) {
+  compuestosDisponibles = catalog.filter(p => p && p.tipo === 'compuesto');
+}
       if (compuestosDisponibles.length > 0 && kgNecesarios > 0) {
         const presentacionesAdaptadas = compuestosDisponibles.map(p => ({ ...p, kg: p.kg }));
         const combinacion = combinarCompuestos(kgNecesarios, presentacionesAdaptadas);
