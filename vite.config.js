@@ -9,35 +9,32 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['logo.png', 'reveal-sound.mp3'], // Asegura tus archivos premium en la caché
+      // Agregamos tus nuevos iconos a los assets incluidos en la caché offline
+      includeAssets: ['logo.png', 'pwa-192x192.png', 'pwa-512x512.png', 'reveal-sound.mp3'], 
       manifest: {
         name: 'Cuantificador OBS',
         short_name: 'CuantificadorOBS',
         description: 'Calculadora PWA para cuantificación de materiales OBS',
-        theme_color: '#ffffff',
+        theme_color: '#031d56', // 🛠️ Cambiado al azul corporativo para que la barra de notificaciones del cel combine
         background_color: '#ffffff',
         display: 'standalone', // Abre la app a pantalla completa sin barras del navegador
         orientation: 'portrait',
         icons: [
           {
-            src: 'logo.png', // Usamos tu logo actual como icono de la app
+            src: 'pwa-192x192.png', // 👈 Tu nuevo icono con fondo sólido y margen seguro
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable' // Permite a Android adaptarlo a formas circulares/cuadradas sin romperlo
           },
           {
-            src: 'logo.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
-          {
-            src: 'logo.png',
+            src: 'pwa-512x512.png', // 👈 Tu nuevo icono de alta resolución
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable' // Para que Android lo adapte perfecto a sus iconos redondos
+            purpose: 'any maskable'
           }
         ]
       }
-    })
+    ])
   ],
-  base: '/cuantificador-obs/', // 👈 Esto le dice a Vite que el proyecto se sube a tu repositorio específico
+  base: '/cuantificador-obs/', // Esto le dice a Vite que el proyecto se sube a tu repositorio específico
 })
